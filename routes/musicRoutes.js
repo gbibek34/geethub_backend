@@ -52,9 +52,7 @@ router.post(
     musicData
       .save()
       .then(function () {
-        res
-          .status(200)
-          .json({ msg: 'Music Uploaded Successfully', success: true });
+        res.status(200).json({ data: musicData, success: true });
       })
       .catch(function (e) {
         console.log(e);
@@ -62,5 +60,18 @@ router.post(
       });
   }
 );
+
+// list My Music
+router.get('/music/my', function (req, res) {
+  Music.find({
+    uploadedBy: '6283d941aa182558f39eaa19', // change id to dynamic value
+  }).exec(function (err, result) {
+    if (err) {
+      res.status(400).json({ msg: 'Operation unsuccessful', success: false });
+    } else {
+      res.status(200).json({ data: result, success: true });
+    }
+  });
+});
 
 module.exports = router;
