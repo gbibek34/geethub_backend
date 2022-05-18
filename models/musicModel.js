@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const User = require('./userModel');
 
-const Music = new mongoose.model('Music', {
+const Music = mongoose.model('Music', {
   name: {
     type: String,
     required: true,
@@ -35,6 +35,7 @@ const Music = new mongoose.model('Music', {
   },
   coverArt: {
     type: String,
+    required: true,
   },
 });
 
