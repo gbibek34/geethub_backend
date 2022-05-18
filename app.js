@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 var cors = require('cors');
 
-require ("./models/user")
+require ("./models/userModel")
 
 const PORT = 3000;
 
