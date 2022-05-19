@@ -7,6 +7,9 @@ const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const { v4: uuidv4 } = require("uuid");
 require("dotenv").config();
+const auth = require("../auth/auth");
+const jwt = require("jsonwebtoken");
+
 
 let transporter = nodemailer.createTransport({
   service: "gmail",
@@ -207,6 +210,39 @@ router.get("/verify/:userId/:uniqueString", (req, res) => {
 
 router.get("/verified/:msg", (req, res) => {
   return res.send(`${req.params.msg}`);
+});
+
+router.post("/login", (req, res) => {
+  var { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ msg: "Please add all fields" });
+  }
+  User.findOne({ email: email }).then((savedUser) => {
+    if (!savedUser) {
+      return res.status(400).json({ msg: "Invalid Email or password" });
+    }
+    bcrypt
+      .compare(password, savedUser.password)
+      .then((match) => {
+        if (match) {
+          if (!savedUser.is_authenticated) {
+            return res.status(400).json({ msg: "Account not verified" });
+          }
+          const token = jwt.sign({ _id: savedUser._id }, "mysecretkey");
+          res.json({ token: token });
+        } else {
+          return res.status(400).json({ msg: "Invalid email or password" });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  });
+});
+
+router.get("/profile", auth.verifyUser, function (req, res) {
+  console.log(req.userInfo.email);
+  return res.status(200).json({ success: true, msg: "user verified" });
 });
 
 module.exports = router;
