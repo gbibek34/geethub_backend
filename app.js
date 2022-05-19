@@ -1,40 +1,41 @@
-const express = require('express');
-const mongoose = require('mongoose');
-var cors = require('cors');
+require("dotenv").config();
+const express = require("express");
+var cors = require("cors");
+const connection = require("./database/connection");
 
-require ("./models/user")
+require("./models/userModel");
+require("./models/userVerificationModel");
 
-const PORT = 3000;
+connection();
 
 const app = express();
 app.use(express.json());
-app.use(require("./routes/authRoutes"))
+app.use(require("./routes/authRoutes"));
+
+const PORT = process.env.PORT;
 
 app.use(express.urlencoded({ extended: true }));
-require('./database/connection');
 
 app.use(function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Credentials', true);
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Credentials", true);
 
   res.header(
-    'Access-Control-Allow-Methods',
-    'GET,HEAD,OPTIONS,POST,PUT,DELETE'
+    "Access-Control-Allow-Methods",
+    "GET,HEAD,OPTIONS,POST,PUT,DELETE"
   );
   res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept, x-client-key, x-client-token, x-client-secret, Authorization'
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, x-client-key, x-client-token, x-client-secret, Authorization"
   );
   next();
 });
 
 //here
-app.get('/',(req,res)=>{
-  res.send("hello world")
-})
+app.get("/", (req, res) => {
+  res.send("hello world");
+});
 
 app.use(cors());
-app.options('*', cors());
-app.listen(PORT,()=>{
-  console.log("Kore no server wa running on port:",PORT)
-})
+app.options("*", cors());
+app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
