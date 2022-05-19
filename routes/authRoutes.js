@@ -14,7 +14,7 @@ router.post("/signup", (req, res) => {
   var { username, email, password } = req.body;
   console.log(req.body);
   if (!username || !email || !password) {
-    return res.status(422).json({ error: "Add all data" });
+    return res.status(400).json({ msg: "Add all data" });
   }
 
   bcrypt.hash(password, 12).then((hashedpw) => {
@@ -22,7 +22,7 @@ router.post("/signup", (req, res) => {
       .then((savedUser) => {
         if (savedUser) {
           return res
-            .status(422)
+            .status(400)
             .json({ error: "User already exists with that email" });
         }
         const user = new User({
@@ -33,7 +33,7 @@ router.post("/signup", (req, res) => {
         user
           .save()
           .then((user) => {
-            res.json({ message: "Saved Successfully" });
+            res.status(200).json({success:true, msg: "Saved Successfully" });
             console.log(user.email);
           })
           .catch((err) => {
@@ -49,23 +49,23 @@ router.post("/signup", (req, res) => {
 router.post("/login", (req, res) => {
   var { email, password } = req.body;
   if (!email || !password) {
-    return res.status(422).json({ error: "Please add all fields" });
+    return res.status(400).json({ msg: "Please add all fields" });
   }
   User.findOne({ email: email }).then((savedUser) => {
     if (!savedUser) {
-      return res.status(422).json({ error: "Invalid Email or password" });
+      return res.status(400).json({ msg: "Invalid Email or password" });
     }
     bcrypt
       .compare(password, savedUser.password)
       .then((match) => {
         if (match) {
           if (!savedUser.isVerified) {
-            return res.status(442).json({ error: "Account not verified" });
+            return res.status(400).json({ msg: "Account not verified" });
           }
           const token = jwt.sign({ _id: savedUser._id }, "mysecretkey");
           res.json({ token: token });
         } else {
-          return res.status(422).json({ error: "Invalid email or password" });
+          return res.status(400).json({ msg: "Invalid email or password" });
         }
       })
       .catch((err) => {
@@ -77,5 +77,5 @@ module.exports = router;
 
 router.get("/profile", auth.verifyUser, function (req, res) {
   console.log(req.userInfo.email);
-  return res.json({ message: "user verified" });
+  return res.status(200).json({success:true, msg: "user verified" });
 });
