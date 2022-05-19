@@ -4,28 +4,10 @@ const mongoose = require("mongoose");
 const User = mongoose.model("User");
 const UserVerification = mongoose.model("UserVerification");
 const bcrypt = require("bcryptjs");
-const nodemailer = require("nodemailer");
-const { v4: uuidv4 } = require("uuid");
-require("dotenv").config();
+const crypto = require("crypto");
 const auth = require("../auth/auth");
 const jwt = require("jsonwebtoken");
-
-
-let transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.AUTH_EMAIL,
-    pass: process.env.AUTH_PASS,
-  },
-});
-
-transporter.verify((error, success) => {
-  if (error) {
-    console.log(error);
-  } else {
-    console.log("Server is ready to take messages");
-  }
-});
+const sendMail = require("../utils/sendEmail");
 
 router.post("/signup", (req, res) => {
   var { name, email, password } = req.body;
@@ -84,154 +66,102 @@ router.post("/signup", (req, res) => {
 });
 
 const sendVerificationEmail = ({ _id, email, name }, res) => {
-  const currentUrl = "http://localhost:5000/";
-  const uniqueString = uuidv4() + _id;
-  const mailOptions = {
-    from: process.env.AUTH_EMAIL,
-    to: email,
-    subject: "Verify Your Email Address",
-    html: `
-    <h2>Hello ${name},</h2>
-    <h3>
-    You have registered an account on geethub, before being able to use your account you need to verify that this is your email address by clicking the verify button.
-    </h3>
-    <table width="100%" cellspacing="0" cellpadding="0">
-    <tr>
-        <td>
-            <table cellspacing="0" cellpadding="0">
-                <tr>
-                    <td style="border-radius: 2px;" bgcolor="#3D85A3">
-                        <a href="${currentUrl}verify/${_id}/${uniqueString}" target="_blank" style="padding: 8px 12px; border: 1px solid #3D85A3;border-radius: 2px;font-family: Helvetica, Arial, sans-serif;font-size: 14px; color: #ffffff;text-decoration: none;font-weight:bold;display: inline-block;">
-                            Verify Email             
-                        </a>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-  </table>
-  <p>This Link will expires in 24 hours</p>
-  <hr>
-  <p>If you have problems, please paste the below URL into your web browser.</p>
-  <p>${currentUrl}verify/${_id}/${uniqueString}</p>
-  <hr>
-  <p>Thanks! Geethub team</p>
-  `,
-  };
+  const currentUrl = process.env.BASE_URL;
+  uniqueString = crypto.randomBytes(32).toString("hex");
 
-  const saltRound = 10;
-  bcrypt
-    .hash(uniqueString, saltRound)
-    .then((hashedString) => {
-      const newVerification = new UserVerification({
-        userId: _id,
-        uniqueString: hashedString,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + 24 * 60 * 60 * 1000,
-      });
-      newVerification
-        .save()
-        .then(() => {
-          transporter.sendMail(mailOptions).then(() => {
-            return res.status(200).json({ msg: "Email sent", success: true });
-          });
-        })
-        .catch((err) => {
-          return res.status(400).json({ msg: err.message, success: false });
+  const newVerification = new UserVerification({
+    userId: _id,
+    uniqueString: uniqueString,
+  });
+  newVerification
+    .save()
+    .then(() => {
+      sendMail(email, "Verify Your Email", "Geethub", "emailVerification", {
+        name: name,
+        currentUrl: currentUrl,
+        _id: _id,
+        uniqueString: uniqueString,
+      }).then(() => {
+        return res.status(200).json({
+          msg: "Verification email sent to your registered email address",
+          success: true,
         });
+      });
     })
     .catch((err) => {
-      return res.status(400).json({ msg: err.message, success: false });
+      return res.status(500).json({ msg: err.message, success: false });
     });
 };
 
-router.get("/verify/:userId/:uniqueString", (req, res) => {
-  let { userId, uniqueString } = req.params;
-  UserVerification.find({ userId })
-    .then((result) => {
-      if (result.length > 0) {
-        const { expiresAt } = result[0];
-        const hashedUniqueString = result[0].uniqueString;
-        if (Date.now() > expiresAt) {
-          UserVerification.deleteOne({ userId })
-            .then(() => {
-              let message = "Link expired";
-              res.redirect(`/verified/${message}`);
-            })
-            .catch((err) => {
-              return res.redirect(`/verified/${err.message}`);
-            });
-        } else {
-          bcrypt
-            .compare(uniqueString, hashedUniqueString)
-            .then((result) => {
-              if (result) {
-                UserVerification.deleteOne({ userId })
-                  .then(() => {
-                    User.findOneAndUpdate(
-                      { _id: userId },
-                      { is_authenticated: true }
-                    )
-                      .then(() => {
-                        UserVerification.deleteOne({ userId })
-                          .then(() => {
-                            let message = "Email Verified";
-                            return res.redirect(`/verified/${message}`);
-                          })
-                          .catch((err) => {
-                            return res.redirect(`/verified/${err.message}`);
-                          });
-                      })
-                      .catch((err) => {
-                        return res.redirect(`/verified/${err.message}`);
-                      });
-                  })
-                  .catch((err) => {
-                    return res.redirect(`/verified/${err.message}`);
-                  });
-              } else {
-                let message = "Link not valid";
-                return res.redirect(`/verified/${message}`);
-              }
-            })
-            .catch((err) => {
-              return res.redirect(`/verified/${err.message}`);
-            });
-        }
-      } else {
-        let message = "Account has been verified already try logging in";
-        return res.redirect(`/verified/${message}`);
-      }
-    })
-    .catch((err) => {
-      return res.redirect(`/verified/${err.message}`);
-    });
-});
+router.get("/verify/:userId/:uniqueString", async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.params.userId });
+    if (!user)
+      return res.status(400).json({ msg: "Invalid link", success: false });
 
-router.get("/verified/:msg", (req, res) => {
-  return res.send(`${req.params.msg}`);
+    const token = await UserVerification.findOne({
+      userId: user._id,
+      uniqueString: req.params.uniqueString,
+    });
+    if (!token)
+      return res.status(400).json({ msg: "Invalid link", success: false });
+
+    await User.updateOne({ _id: user._id }, { is_authenticated: true });
+    await token.remove();
+
+    return res
+      .status(200)
+      .json({ msg: "Email verified successfully", success: true });
+  } catch (err) {
+    return res.status(500).json({ msg: "User not found", success: false });
+  }
 });
 
 router.post("/login", (req, res) => {
   var { email, password } = req.body;
   if (!email || !password) {
-    return res.status(400).json({ msg: "Please add all fields" });
+    return res
+      .status(400)
+      .json({ msg: "Please add all fields", success: false });
   }
   User.findOne({ email: email }).then((savedUser) => {
     if (!savedUser) {
-      return res.status(400).json({ msg: "Invalid Email or password" });
+      return res
+        .status(400)
+        .json({ msg: "Invalid Email or password", success: false });
     }
     bcrypt
       .compare(password, savedUser.password)
       .then((match) => {
         if (match) {
           if (!savedUser.is_authenticated) {
-            return res.status(400).json({ msg: "Account not verified" });
+            UserVerification.findOne({ userId: savedUser._id })
+              .then((result) => {
+                if (result === null) {
+                  sendVerificationEmail(savedUser, res);
+                } else {
+                  UserVerification.findOneAndDelete({ userId: savedUser._id })
+                    .then(sendVerificationEmail(savedUser, res))
+                    .catch((err) => {
+                      return res
+                        .status(500)
+                        .json({ msg: "Internal Server Error", success: false });
+                    });
+                }
+              })
+              .catch((err) => {
+                return res
+                  .status(400)
+                  .json({ msg: err.message, success: false });
+              });
+          } else {
+            const token = jwt.sign({ _id: savedUser._id }, "mysecretkey");
+            res.status(200).json({ token: token, success: true });
           }
-          const token = jwt.sign({ _id: savedUser._id }, "mysecretkey");
-          res.json({ token: token });
         } else {
-          return res.status(400).json({ msg: "Invalid email or password" });
+          return res
+            .status(400)
+            .json({ msg: "Invalid email or password", success: false });
         }
       })
       .catch((err) => {

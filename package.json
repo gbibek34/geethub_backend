@@ -19,8 +19,8 @@
     "mongoose": "^6.3.3",
     "multer": "^1.4.4",
     "nodemailer": "^6.7.5",
+    "nodemailer-express-handlebars": "^5.0.0",
     "nodemon": "^2.0.16",
-    "path": "^0.12.7",
-    "uuid": "^8.3.2"
+    "path": "^0.12.7"
   }
 }
