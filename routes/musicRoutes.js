@@ -6,6 +6,7 @@ const Music = require('../models/musicModel');
 const multer = require('multer');
 const musicUpload = require('../file/musicUpload');
 const coverArtUpload = require('../file/coverArtUpload');
+const auth = require('../auth/auth');
 
 // upload new music
 router.post(
@@ -20,6 +21,7 @@ router.post(
       maxCount: 1,
     },
   ]),
+  auth.verifyUser,
   function (req, res) {
     const audio = req.files.audio[0].path;
     const coverArt = req.files.coverArt[0].path;
@@ -34,7 +36,7 @@ router.post(
     // });
     const description = req.body.description;
     const genre = req.body.genre;
-    const uploadedBy = req.body.uploadedBy;
+    const uploadedBy = req.userInfo._id;
     const uploadedOn = new Date();
     const isPublished = true;
 

@@ -1,13 +1,19 @@
+require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 var cors = require('cors');
+const connection = require('./database/connection');
 
-const PORT = 3000;
+require('./models/userModel');
+require('./models/userVerificationModel');
+
+connection();
 
 const app = express();
 app.use(express.json());
+
+const PORT = process.env.PORT;
+
 app.use(express.urlencoded({ extended: true }));
-require('./database/connection');
 
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
@@ -37,6 +43,4 @@ app.get('/', (req, res) => {
 
 app.use(cors());
 app.options('*', cors());
-app.listen(PORT, () => {
-  console.log('Kore no server wa running on port:', PORT);
-});
+app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
