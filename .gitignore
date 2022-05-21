@@ -3,3 +3,4 @@
 /images
 .env
 .vscode
+.prettierignore
