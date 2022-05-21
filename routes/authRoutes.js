@@ -14,7 +14,7 @@ router.post('/signup', (req, res) => {
 
   if (!name || !email || !password) {
     return res.status(400).json({ msg: 'Add all data', success: false });
-  } else if (!/^[a-zA-Z]*$/.test(name)) {
+  } else if (!/^[a-zA-Z ]*$/.test(name)) {
     return res
       .status(400)
       .json({ msg: 'Name should contain only letters', success: false });
