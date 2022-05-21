@@ -10,7 +10,6 @@ connection();
 
 const app = express();
 app.use(express.json());
-app.use(require("./routes/authRoutes"));
 
 const PORT = process.env.PORT;
 
@@ -31,6 +30,8 @@ app.use(function (req, res, next) {
   next();
 });
 
+app.use(require("./routes/authRoutes"));
+
 //here
 app.get("/", (req, res) => {
   res.send("hello world");
@@ -38,4 +39,5 @@ app.get("/", (req, res) => {
 
 app.use(cors());
 app.options("*", cors());
+
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
