@@ -1,3 +1,5 @@
 /node_modules
+/music
+/images
 .env
 .vscode
