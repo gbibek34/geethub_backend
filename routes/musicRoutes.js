@@ -8,6 +8,7 @@ const musicUpload = require('../file/musicUpload');
 const coverArtUpload = require('../file/coverArtUpload');
 const auth = require('../auth/auth');
 const path = require('path');
+const { route } = require('./authRoutes');
 
 // upload new music
 router.post(
@@ -84,6 +85,29 @@ router.get('/music/coverArt/:file(*)', (req, res) => {
   //res.send({image: fileLocation});
   console.log(fileLocation);
   res.sendFile(__dirname.slice(0, -7) + `${fileLocation}`);
+});
+
+// Get all Music
+router.get('/music/all', auth.verifyUser, function (req, res) {
+  Music.find({}, function (err, result) {
+    if (err) {
+      res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
+    } else {
+      res.status(200).json({ data: result, success: true });
+    }
+  });
+});
+
+// Get music by id
+router.get('/music/get/:id', auth.verifyUser, function (req, res) {
+  const id = req.params.id;
+  const music = Music.findOne({ _id: id }).then(function (musicData) {
+    if (musicData != null) {
+      res.status(200).json({ data: musicData, success: true });
+    } else {
+      res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
+    }
+  });
 });
 
 module.exports = router;

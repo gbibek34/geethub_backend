@@ -176,4 +176,16 @@ router.get('/profile', auth.verifyUser, function (req, res) {
   return res.status(200).json({ success: true, msg: 'user verified' });
 });
 
+// Get user by id
+router.get('/user/:id', auth.verifyUser, function (req, res) {
+  const id = req.params.id;
+  const user = User.findOne({ _id: id }).then(function (userData) {
+    if (userData != null) {
+      res.status(200).json({ data: userData, success: true });
+    } else {
+      res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
+    }
+  });
+});
+
 module.exports = router;
