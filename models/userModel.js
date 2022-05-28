@@ -30,6 +30,24 @@ const User = mongoose.model('User', {
     default: false,
     required: true,
   },
+  profile_image: {
+    type: String,    
+  },
+  followers: {
+    type: Number,
+    default: 0,
+  },
+  social: {
+    type: Object,
+    default: {
+      instagram: '',
+      facebook: '',
+      twitter: '',
+    }
+  },
+  bio: {
+    type: String,
+  },
 });
 
 module.exports = User;

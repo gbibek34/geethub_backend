@@ -32,7 +32,9 @@ app.use(function (req, res, next) {
 
 const authRoute = require('./routes/authRoutes');
 const musicRoute = require('./routes/musicRoutes');
+const profileRoute = require('./routes/profileRoutes');
 
+app.use(profileRoute);
 app.use(authRoute);
 app.use(musicRoute);
 
