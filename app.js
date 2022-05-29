@@ -33,11 +33,12 @@ app.use(function (req, res, next) {
 const authRoute = require('./routes/authRoutes');
 const musicRoute = require('./routes/musicRoutes');
 const profileRoute = require('./routes/profileRoutes');
+const playlistRoute = require('./routes/playlistRoutes');
 
 app.use(profileRoute);
 app.use(authRoute);
 app.use(musicRoute);
-
+app.use(playlistRoute);
 //here
 app.get('/', (req, res) => {
   res.send('hello world');
