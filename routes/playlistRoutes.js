@@ -4,6 +4,7 @@ const Playlist = require("../models/playlistModel");
 const auth = require("../auth/auth");
 const path = require("path");
 
+const Music = require("../models/musicModel");
 //create new playlist
 router.post("/playlist/create", auth.verifyUser, (req, res) => {
   const name = req.body.name;
@@ -24,11 +25,12 @@ router.post("/playlist/create", auth.verifyUser, (req, res) => {
   playlistData
     .save()
     .then(function () {
-      res.status(200).json({ data: playlistData, success: true });
+      console.log("success");
+      res.status(200).json({ success: true, data: playlistData });
     })
     .catch(function (e) {
       console.log(e);
-      res.status(400).json({ mgs: "An error occured", success: false });
+      res.status(400).json({ msg: "An error occured", success: false });
     });
 });
 
@@ -42,7 +44,7 @@ router.get("/playlist/getuserplaylist", auth.verifyUser, (req, res) => {
         .status(400)
         .json({ msg: "Something went wrong", success: false });
     } else {
-      console.log(docs.length);
+      // console.log(docs.length);
       return res.status(200).json({ success: true, data: result });
     }
   });
@@ -75,30 +77,84 @@ router.get("playlist/details", auth.verifyUser, (req, res) => {
   });
 });
 
+// add new music to playlist
+router.post("/playlist/addmusic", (req, res) => {
+  const musicId = req.body.musicId;
+  console.log(req.body.playlistId);
+
+  Playlist.findOne({ _id: req.body.playlistId }).then(
+    function(playlistData) {
+      if(!playlistData.playlistMusic.includes(musicId)) {
+        Playlist.findOneAndUpdate(
+          { _id: req.body.playlistId },
+          {
+            $push: {
+              playlistMusic: musicId,
+            },
+          },
+          (err, result) => {
+            if (!err) {
+              return res.send({ success: true, data: result });
+            } else {
+              console.log(err);
+              return res
+                .status(400)
+                .json({ msg: "Something went wrong.", success: false });
+            }
+          }
+        );
+      } else {
+        res.status(400).json({msg: 'Music already exists in this playlist', success:false})
+      }
+    }
+  );
+  
+});
+
 //--> TODO: get all the musics inside the playlist
-// router.get("/playlist/musics", auth.verifyUser, (req, res) => {
-//   const playlistId = req.body.playlistId;
-//   let allMusics = [];
-//   const result = Playlist.find(
-//     { _id: playlistId },
-//     { playlistMusic: 1 },
-//     function (err, musics) {
-//       if (err) {
-//         return res
-//           .status(400)
-//           .json({ msg: "Something went wrong.", success: false });
-//       } else {
-//         for (i in musics) {
-//           console.log("hello");
-//           console.log(musics[i]);
-//           allMusics.push(musics[i]);
-//         }
-//         console.log("hello 2");
-//         console.log(allMusics);
-//         return res.send({ success: true, data: musics });
-//       }
-//     }
-//   );
-// });
+router.get("/playlist/musics/:id", auth.verifyUser, (req, res) => {
+  const playlistId = req.params.id;
+  // function musicDetail(music,i){
+  //   Music.find({ _id: music[i] }).then((musicData) => {
+  //     if (musicData !== null) {
+  //       console.log("yes");
+  //       // console.log(musicData[0]);
+  //       allMusics.push("yes");
+  //     }
+  //   });
+  // }
+  Playlist.find(
+    { _id: playlistId },
+    { playlistMusic: 1 },
+    function (err, musics) {
+      if (err) {
+        return res
+          .status(400)
+          .json({ msg: "Something went wrong.", success: false });
+      } else {
+        let allMusics = [];
+
+        for (i in musics[0].playlistMusic) {
+          allMusics.push(musics[0].playlistMusic[i]);
+        }
+
+        // console.log(allMusics);
+        Music.find({
+          _id: {
+            $in: allMusics,
+          },
+        }).exec((err, musicData) => {
+          if (musicData !== null) {
+            // console.log("yes");
+            // console.log(musicData[0]);
+            // allMusics.push(musicData[0]);
+            console.log(musicData);
+            return res.send({ success: true, data: musicData });
+          }
+        });
+      }
+    }
+  );
+});
 
 module.exports = router;
