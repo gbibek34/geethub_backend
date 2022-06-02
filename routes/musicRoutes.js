@@ -83,7 +83,6 @@ router.get('/music/coverArt/:file(*)', (req, res) => {
   let file = req.params.file;
   let fileLocation = path.join('/music/', file);
   //res.send({image: fileLocation});
-  console.log(fileLocation);
   res.sendFile(__dirname.slice(0, -7) + `${fileLocation}`);
 });
 

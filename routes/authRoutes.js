@@ -97,15 +97,27 @@ router.get('/verify/:userId/:uniqueString', async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.params.userId });
     if (!user)
-      return res.status(200).json({ msg: "User does not exist try signup or check the link again", success: false });
-    if(user.is_authenticated)
-      return res.status(200).json({ msg: "User is already verified", success: true });
+      return res
+        .status(200)
+        .json({
+          msg: 'User does not exist try signup or check the link again',
+          success: false,
+        });
+    if (user.is_authenticated)
+      return res
+        .status(200)
+        .json({ msg: 'User is already verified', success: true });
     const token = await UserVerification.findOne({
       userId: user._id,
       uniqueString: req.params.uniqueString,
     });
     if (!token)
-      return res.status(200).json({ msg: "Invalid link or token expired try logging in for new email", success: false });
+      return res
+        .status(200)
+        .json({
+          msg: 'Invalid link or token expired try logging in for new email',
+          success: false,
+        });
 
     await User.updateOne({ _id: user._id }, { is_authenticated: true });
     await token.remove();
@@ -114,7 +126,7 @@ router.get('/verify/:userId/:uniqueString', async (req, res) => {
       .status(200)
       .json({ msg: 'Email verified successfully', success: true });
   } catch (err) {
-    return res.status(500).json({ msg: "Invalid Link", success: false });
+    return res.status(500).json({ msg: 'Invalid Link', success: false });
   }
 });
 
@@ -172,7 +184,6 @@ router.post('/login', (req, res) => {
 });
 
 router.get('/profile', auth.verifyUser, function (req, res) {
-  console.log(req.userInfo.email);
   return res.status(200).json({ success: true, msg: 'user verified' });
 });
 

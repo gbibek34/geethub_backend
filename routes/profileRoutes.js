@@ -16,12 +16,10 @@ const { default: mongoose } = require('mongoose');
 // .select("-_id -__v -joined_date -is_authenticated -password")
 
 router.get('/user/profile', auth.verifyUser, (req, res) => {
-  console.log(req.userInfo._id);
   if (mongoose.Types.ObjectId.isValid(req.userInfo._id)) {
     User.findById(req.userInfo._id)
       .select('-__v -joined_date -is_authenticated -password')
       .exec((err, user) => {
-        console.log(user);
         if (err) {
           return res.status(400).json({
             msg: 'Something went wrong',

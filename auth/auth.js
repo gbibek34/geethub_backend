@@ -10,7 +10,6 @@ module.exports.verifyUser = function (req, res, next) {
     User.findOne({ _id: data._id })
       .then(function (result) {
         req.userInfo = result;
-        console.log(mongoose.Types.ObjectId.isValid(req.userInfo._id));
         next();
       })
       .catch(function (e) {
