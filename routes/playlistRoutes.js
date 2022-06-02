@@ -64,11 +64,12 @@ router.get("/playlist/all", auth.verifyUser, (req, res) => {
 });
 
 //get the details of any playlist by id
-router.get("playlist/details", auth.verifyUser, (req, res) => {
-  const playlistId = req.body.playlistId;
-  Playlist.find({ _id: orderid }, (err, result) => {
+router.get("/playlist/details/:id", auth.verifyUser, (req, res) => {
+
+  const playlistId = req.params.id;
+  Playlist.find({ _id: playlistId }, (err, result) => {
     if (!err) {
-      return res.send({ success: true, data: result });
+      return res.send({ success: true, data: result[0] });
     } else {
       return res
         .status(400)
@@ -82,47 +83,37 @@ router.post("/playlist/addmusic", (req, res) => {
   const musicId = req.body.musicId;
   console.log(req.body.playlistId);
 
-  Playlist.findOne({ _id: req.body.playlistId }).then(
-    function(playlistData) {
-      if(!playlistData.playlistMusic.includes(musicId)) {
-        Playlist.findOneAndUpdate(
-          { _id: req.body.playlistId },
-          {
-            $push: {
-              playlistMusic: musicId,
-            },
+  Playlist.findOne({ _id: req.body.playlistId }).then(function (playlistData) {
+    if (!playlistData.playlistMusic.includes(musicId)) {
+      Playlist.findOneAndUpdate(
+        { _id: req.body.playlistId },
+        {
+          $push: {
+            playlistMusic: musicId,
           },
-          (err, result) => {
-            if (!err) {
-              return res.send({ success: true, data: result });
-            } else {
-              console.log(err);
-              return res
-                .status(400)
-                .json({ msg: "Something went wrong.", success: false });
-            }
+        },
+        (err, result) => {
+          if (!err) {
+            return res.send({ success: true, data: result });
+          } else {
+            console.log(err);
+            return res
+              .status(400)
+              .json({ msg: "Something went wrong.", success: false });
           }
-        );
-      } else {
-        res.status(400).json({msg: 'Music already exists in this playlist', success:false})
-      }
+        }
+      );
+    } else {
+      res
+        .status(400)
+        .json({ msg: "Music already exists in this playlist", success: false });
     }
-  );
-  
+  });
 });
 
-//--> TODO: get all the musics inside the playlist
+// get all the musics inside the playlist
 router.get("/playlist/musics/:id", auth.verifyUser, (req, res) => {
   const playlistId = req.params.id;
-  // function musicDetail(music,i){
-  //   Music.find({ _id: music[i] }).then((musicData) => {
-  //     if (musicData !== null) {
-  //       console.log("yes");
-  //       // console.log(musicData[0]);
-  //       allMusics.push("yes");
-  //     }
-  //   });
-  // }
   Playlist.find(
     { _id: playlistId },
     { playlistMusic: 1 },
@@ -138,17 +129,12 @@ router.get("/playlist/musics/:id", auth.verifyUser, (req, res) => {
           allMusics.push(musics[0].playlistMusic[i]);
         }
 
-        // console.log(allMusics);
         Music.find({
           _id: {
             $in: allMusics,
           },
         }).exec((err, musicData) => {
           if (musicData !== null) {
-            // console.log("yes");
-            // console.log(musicData[0]);
-            // allMusics.push(musicData[0]);
-            console.log(musicData);
             return res.send({ success: true, data: musicData });
           }
         });
