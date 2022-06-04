@@ -63,8 +63,7 @@ router.get('/playlist/all', auth.verifyUser, (req, res) => {
 });
 
 //get the details of any playlist by id
-router.get("/playlist/details/:id", auth.verifyUser, (req, res) => {
-
+router.get('/playlist/details/:id', auth.verifyUser, (req, res) => {
   const playlistId = req.params.id;
   Playlist.find({ _id: playlistId }, (err, result) => {
     if (!err) {
@@ -78,39 +77,49 @@ router.get("/playlist/details/:id", auth.verifyUser, (req, res) => {
 });
 
 // add new music to playlist
-router.post('/playlist/addmusic', (req, res) => {
+router.post('/playlist/addmusic', auth.verifyUser, (req, res) => {
   const musicId = req.body.musicId;
 
   Playlist.findOne({ _id: req.body.playlistId }).then(function (playlistData) {
-    if (!playlistData.playlistMusic.includes(musicId)) {
-      Playlist.findOneAndUpdate(
-        { _id: req.body.playlistId },
-        {
-          $push: {
-            playlistMusic: musicId,
+    if (playlistData.createdBy.toString() === req.userInfo._id.toString()) {
+      console.log(musicId);
+      console.log(playlistData.playlistMusic);
+      if (!playlistData.playlistMusic.includes(musicId)) {
+        Playlist.findOneAndUpdate(
+          { _id: req.body.playlistId },
+          {
+            $push: {
+              playlistMusic: musicId,
+            },
           },
-        },
-        (err, result) => {
-          if (!err) {
-            return res.send({ success: true, data: result });
-          } else {
-            console.log(err);
-            return res
-              .status(400)
-              .json({ msg: "Something went wrong.", success: false });
+          (err, result) => {
+            if (!err) {
+              return res.send({ success: true, data: result });
+            } else {
+              console.log(err);
+              return res
+                .status(400)
+                .json({ msg: 'Something went wrong.', success: false });
+            }
           }
-        }
-      );
+        );
+      } else {
+        res.status(400).json({
+          msg: 'Music already exists in this playlist',
+          success: false,
+        });
+      }
     } else {
-      res
-        .status(400)
-        .json({ msg: "Music already exists in this playlist", success: false });
+      res.status(400).json({
+        msg: 'You cannot edit this playlist',
+        success: false,
+      });
     }
   });
 });
 
 // get all the musics inside the playlist
-router.get("/playlist/musics/:id", auth.verifyUser, (req, res) => {
+router.get('/playlist/musics/:id', auth.verifyUser, (req, res) => {
   const playlistId = req.params.id;
   Playlist.find(
     { _id: playlistId },
