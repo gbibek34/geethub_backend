@@ -152,6 +152,7 @@ router.post('/login', (req, res) => {
               .then((result) => {
                 if (result === null) {
                   sendVerificationEmail(savedUser, res);
+                  return res.status(200).json({msg: 'Verification email sent', success: false});
                 } else {
                   UserVerification.findOneAndDelete({ userId: savedUser._id })
                     .then(sendVerificationEmail(savedUser, res))
