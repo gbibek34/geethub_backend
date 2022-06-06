@@ -7,14 +7,7 @@ const path = require('path');
 const auth = require('../auth/auth');
 const { default: mongoose } = require('mongoose');
 
-// Music.find({
-//   uploadedBy: req.userInfo._id,
-// })
-//   .count()
-
-// User.findById(req.userInfo._id)
-// .select("-_id -__v -joined_date -is_authenticated -password")
-
+// Get User Profile
 router.get('/user/profile', auth.verifyUser, (req, res) => {
   if (mongoose.Types.ObjectId.isValid(req.userInfo._id)) {
     User.findById(req.userInfo._id)
@@ -50,7 +43,7 @@ router.get('/user/profile', auth.verifyUser, (req, res) => {
 });
 
 // update user profile
-router.post(
+router.put(
   '/user/profile/update',
   auth.verifyUser,
   musicUpload.single('profile_image'),

@@ -109,4 +109,54 @@ router.get('/music/get/:id', auth.verifyUser, function (req, res) {
   });
 });
 
+// Edit Music
+router.put(
+  '/music/edit/:id', auth.verifyUser, musicUpload.single('coverArt'), function (req, res) {
+    const uploadedBy = req.userInfo._id;
+    const id = req.params.id;
+    Music.findOne({ _id: id }).then(function (musicData) {
+      if (musicData.uploadedBy.toString() === uploadedBy.toString()) {
+        const name = req.body.name;
+        const description = req.body.description;
+        const genre = req.body.genre;
+
+        if (req.file) {
+          coverArt = req.file.path;
+          Music.findOneAndUpdate({ _id: id }, {
+            name,
+            description,
+            genre,
+            coverArt,
+          }, function (err, result) {
+            if (err) {
+              res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
+            } else {
+              res.status(200).json({ data: result, success: true });
+            }
+          });
+        } else {
+          Music.findOneAndUpdate({ _id: id }, {
+            name,
+            description,
+            genre,
+          }, function (err, result) {
+            if (err) {
+              res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
+            } else {
+              res.status(200).json({ data: result, success: true });
+            }
+          });
+        }
+      } else {
+        res.status(400).json({
+          msg: 'You cannot edit this music',
+          success: false,
+        });
+      }
+    }).catch((err) => {
+      res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
+    })
+  }
+);
+
 module.exports = router;
