@@ -109,4 +109,63 @@ router.get('/music/get/:id', auth.verifyUser, function (req, res) {
   });
 });
 
+//like a music
+router.put("/music/like", auth.verifyUser, function (req, res) {
+  const userid = req.userInfo._id;
+  Music.findByIdAndUpdate(
+    req.body.musicId,
+    {
+      $push: { likes: userid },
+    },
+    (err, result) => {
+      if (!err) {
+        return res.send({ success: true, data: result });
+      } else {
+        console.log(err);
+        return res
+          .status(400)
+          .json({ msg: "Something went wrong.", success: false });
+      }
+    }
+  );
+});
+
+//unlike a music
+router.put("/music/unlike", auth.verifyUser, function (req, res) {
+  const userid = req.userInfo._id;
+  Music.findByIdAndUpdate(
+    req.body.musicId,
+    {
+      $pull: { likes: userid },
+    },
+    (err, result) => {
+      if (!err) {
+        return res.send({ success: true, data: result });
+      } else {
+        console.log(err);
+        return res
+          .status(400)
+          .json({ msg: "Something went wrong.", success: false });
+      }
+    }
+  );
+});
+
+//fetch all the music like by the user
+router.get("/music/liked/all", auth.verifyUser, function (req, res) {
+  const userid = req.userInfo._id;
+  Music.find({ likes: { $in: [userid] } }, (err, result) => {
+    if (!err) {
+      return res.send({ success: true, data: result });
+    } else {
+      console.log(err);
+      return res
+        .status(400)
+        .json({ msg: "Something went wrong.", success: false });
+    }
+  });
+});
+
+
+
 module.exports = router;

@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const User = require('./userModel');
+const mongoose = require("mongoose");
+const User = require("./userModel");
 
-const Music = mongoose.model('Music', {
+const Music = mongoose.model("Music", {
   name: {
     type: String,
     required: true,
@@ -37,6 +37,7 @@ const Music = mongoose.model('Music', {
     type: String,
     required: true,
   },
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: User }],
 });
 
 module.exports = Music;
