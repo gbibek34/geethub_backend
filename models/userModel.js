@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const User = mongoose.model('User', {
+const User = mongoose.model("User", {
   name: {
     type: String,
     required: true,
@@ -31,19 +31,20 @@ const User = mongoose.model('User', {
     required: true,
   },
   profile_image: {
-    type: String,    
+    type: String,
   },
   followers: {
     type: Number,
     default: 0,
   },
+  followed_by: [{ type: mongoose.Schema.Types.ObjectId }],
   social: {
     type: Object,
     default: {
-      instagram: '',
-      facebook: '',
-      twitter: '',
-    }
+      instagram: "",
+      facebook: "",
+      twitter: "",
+    },
   },
   bio: {
     type: String,

@@ -1,25 +1,25 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const mongoose = require('mongoose');
-const User = require('../models/userModel');
-const Music = require('../models/musicModel');
-const multer = require('multer');
-const musicUpload = require('../file/musicUpload');
-const coverArtUpload = require('../file/coverArtUpload');
-const auth = require('../auth/auth');
-const path = require('path');
-const { route } = require('./authRoutes');
+const mongoose = require("mongoose");
+const User = require("../models/userModel");
+const Music = require("../models/musicModel");
+const multer = require("multer");
+const musicUpload = require("../file/musicUpload");
+const coverArtUpload = require("../file/coverArtUpload");
+const auth = require("../auth/auth");
+const path = require("path");
+const { route } = require("./authRoutes");
 
 // upload new music
 router.post(
-  '/music/new',
+  "/music/new",
   musicUpload.fields([
     {
-      name: 'audio',
+      name: "audio",
       maxCount: 1,
     },
     {
-      name: 'coverArt',
+      name: "coverArt",
       maxCount: 1,
     },
   ]),
@@ -60,18 +60,18 @@ router.post(
       })
       .catch(function (e) {
         console.log(e);
-        res.status(400).json({ msg: 'An error occurred', success: false });
+        res.status(400).json({ msg: "An error occurred", success: false });
       });
   }
 );
 
 // list My Music
-router.get('/music/my', auth.verifyUser, function (req, res) {
+router.get("/music/my", auth.verifyUser, function (req, res) {
   Music.find({
     uploadedBy: req.userInfo._id, // change id to dynamic value
   }).exec(function (err, result) {
     if (err) {
-      res.status(400).json({ msg: 'Operation unsuccessful', success: false });
+      res.status(400).json({ msg: "Operation unsuccessful", success: false });
     } else {
       res.status(200).json({ data: result, success: true });
     }
@@ -79,18 +79,18 @@ router.get('/music/my', auth.verifyUser, function (req, res) {
 });
 
 // Fetch image
-router.get('/music/coverArt/:file(*)', (req, res) => {
+router.get("/music/coverArt/:file(*)", (req, res) => {
   let file = req.params.file;
-  let fileLocation = path.join('/music/', file);
+  let fileLocation = path.join("/music/", file);
   //res.send({image: fileLocation});
   res.sendFile(__dirname.slice(0, -7) + `${fileLocation}`);
 });
 
 // Get all Music
-router.get('/music/all', auth.verifyUser, function (req, res) {
+router.get("/music/all", auth.verifyUser, function (req, res) {
   Music.find({}, function (err, result) {
     if (err) {
-      res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
+      res.status(400).json({ msg: "Operation Unsuccessful", success: false });
     } else {
       res.status(200).json({ data: result, success: true });
     }
@@ -98,13 +98,13 @@ router.get('/music/all', auth.verifyUser, function (req, res) {
 });
 
 // Get music by id
-router.get('/music/get/:id', auth.verifyUser, function (req, res) {
+router.get("/music/get/:id", auth.verifyUser, function (req, res) {
   const id = req.params.id;
   const music = Music.findOne({ _id: id }).then(function (musicData) {
     if (musicData != null) {
       res.status(200).json({ data: musicData, success: true });
     } else {
-      res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
+      res.status(400).json({ msg: "Operation Unsuccessful", success: false });
     }
   });
 });
@@ -112,43 +112,64 @@ router.get('/music/get/:id', auth.verifyUser, function (req, res) {
 //like a music
 router.put("/music/like", auth.verifyUser, function (req, res) {
   const userid = req.userInfo._id;
-  Music.findByIdAndUpdate(
-    req.body.musicId,
-    {
-      $push: { likes: userid },
-    },
-    (err, result) => {
-      if (!err) {
-        return res.send({ success: true, data: result });
-      } else {
-        console.log(err);
-        return res
-          .status(400)
-          .json({ msg: "Something went wrong.", success: false });
-      }
+  const musicid = req.body.musicid;
+  Music.findOne({ _id: musicid }).then(function (musicData) {
+    if (!musicData.likes.includes(userid)) {
+      Music.findByIdAndUpdate(
+        req.body.musicid,
+        {
+          $push: { likes: userid },
+        },
+        (err, result) => {
+          if (!err) {
+            return res.status(200).json({ success: true, data: result });
+          } else {
+            console.log(err);
+            return res
+              .status(400)
+              .json({ msg: "Something went wrong.", success: false });
+          }
+        }
+      );
+    } else {
+      res.status(400).json({
+        msg: "You have already liked the music",
+        success: false,
+      });
     }
-  );
+  });
 });
 
 //unlike a music
 router.put("/music/unlike", auth.verifyUser, function (req, res) {
   const userid = req.userInfo._id;
-  Music.findByIdAndUpdate(
-    req.body.musicId,
-    {
-      $pull: { likes: userid },
-    },
-    (err, result) => {
-      if (!err) {
-        return res.send({ success: true, data: result });
-      } else {
-        console.log(err);
-        return res
-          .status(400)
-          .json({ msg: "Something went wrong.", success: false });
-      }
+  const musicid = req.body.musicid;
+  Music.findOne({ _id: musicid }).then(function (musicData) {
+    console.log(musicData.likes.includes(userid));
+    if (musicData.likes.includes(userid)) {
+      Music.findByIdAndUpdate(
+        req.body.musicid,
+        {
+          $pull: { likes: userid },
+        },
+        (err, result) => {
+          if (!err) {
+            return res.status(200).json({ success: true, data: result });
+          } else {
+            console.log(err);
+            return res
+              .status(400)
+              .json({ msg: "Something went wrong.", success: false });
+          }
+        }
+      );
+    } else {
+      res.status(400).json({
+        msg: "You have already unliked the music",
+        success: false,
+      });
     }
-  );
+  });
 });
 
 //fetch all the music like by the user
@@ -156,7 +177,7 @@ router.get("/music/liked/all", auth.verifyUser, function (req, res) {
   const userid = req.userInfo._id;
   Music.find({ likes: { $in: [userid] } }, (err, result) => {
     if (!err) {
-      return res.send({ success: true, data: result });
+      return res.status(200).json({ success: true, data: result });
     } else {
       console.log(err);
       return res
@@ -165,7 +186,5 @@ router.get("/music/liked/all", auth.verifyUser, function (req, res) {
     }
   });
 });
-
-
 
 module.exports = router;
