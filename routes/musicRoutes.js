@@ -116,7 +116,6 @@ router.get('/music/search/:searchkey', auth.verifyUser, (req, res) => {
     { name: { $regex: new RegExp(searchkey, 'i') } },
     (err, result) => {
       if (!err) {
-        console.log(result);
         return res.status(200).json({ success: true, data: result });
       } else {
         return res
