@@ -11,7 +11,6 @@ router.get('/artist/search/:searchkey', auth.verifyUser, (req, res) => {
   const searchkey = req.params.searchkey;
   User.find({ name: { $regex: new RegExp(searchkey, 'i') } }, (err, result) => {
     if (!err) {
-      console.log(result);
       return res.status(200).json({ success: true, data: result });
     } else {
       return res
@@ -40,7 +39,6 @@ router.get('/artist/musics/:id', auth.verifyUser, (req, res) => {
   const artistid = req.params.id;
   Music.find({ uploadedBy: artistid }, (err, result) => {
     if (!err) {
-      console.log(result);
       return res.send({ success: true, data: result });
     } else {
       return res
