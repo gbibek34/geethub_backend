@@ -31,7 +31,7 @@ const User = mongoose.model('User', {
     required: true,
   },
   profile_image: {
-    type: String,    
+    type: String,
   },
   followers: {
     type: Number,
@@ -48,6 +48,7 @@ const User = mongoose.model('User', {
   bio: {
     type: String,
   },
+  followed_by: [{ type: mongoose.Schema.Types.ObjectId, ref: User }],
 });
 
 module.exports = User;

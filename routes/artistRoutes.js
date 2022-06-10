@@ -44,4 +44,85 @@ router.get('/artist/musics/:id', auth.verifyUser, (req, res) => {
   });
 });
 
+//follow an artist
+router.put("/artist/follow", auth.verifyUser, function (req, res) {
+  const userid = req.userInfo._id;
+  const artistid = req.body.artistid;
+  console.log("follow");
+  User.findOne({ _id: artistid }).then(function (artistData) {
+    if (!artistData.followed_by.includes(userid)) {
+      User.findByIdAndUpdate(
+        artistid,
+        {
+          $push: { followed_by: userid },
+        },
+        (err, result) => {
+          if (!err) {
+            return res.status(200).json({ success: true, data: result });
+          } else {
+            console.log(err);
+            return res
+              .status(400)
+              .json({ msg: "Something went wrong.", success: false });
+          }
+        }
+      );
+    } else {
+      res.status(400).json({
+        msg: "You have already followed the artist",
+        success: false,
+      });
+    }
+  });
+});
+
+
+//unfollow an artist
+router.put("/artist/unfollow", auth.verifyUser, function (req, res) {
+  const userid = req.userInfo._id;
+  const artistid = req.body.artistid;
+  console.log("unfollow");
+  User.findOne({ _id: artistid }).then(function (artistData) {
+    if (!artistData.followed_by.includes(userid)) {
+      User.findByIdAndUpdate(
+        artistid,
+        {
+          $pull: { followed_by: userid },
+        },
+        (err, result) => {
+          if (!err) {
+            return res.status(200).json({ success: true, data: result });
+          } else {
+            console.log(err);
+            return res
+              .status(400)
+              .json({ msg: "Something went wrong.", success: false });
+          }
+        }
+      );
+    } else {
+      res.status(400).json({
+        msg: "You have already unfollowed the artist",
+        success: false,
+      });
+    }
+  });
+});
+
+
+//fetch all the artists followed by the user
+router.get("/artist/followed/all", auth.verifyUser, function (req, res) {
+  const userid = req.userInfo._id;
+  User.find({ followed_by: { $in: [userid] } }, (err, result) => {
+    if (!err) {
+      return res.status(400).json({ success: true, data: result });
+    } else {
+      console.log(err);
+      return res
+        .status(400)
+        .json({ msg: "Something went wrong.", success: false });
+    }
+  });
+});
+
 module.exports = router;
