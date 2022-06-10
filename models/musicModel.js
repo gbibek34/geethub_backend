@@ -18,6 +18,10 @@ const Music = mongoose.model('Music', {
     type: String,
     required: true,
   },
+  length: {
+    type: Number,
+    required: true,
+  },
   uploadedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: User,

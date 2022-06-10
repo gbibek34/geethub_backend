@@ -140,7 +140,7 @@ router.get('/playlist/musics/:id', auth.verifyUser, (req, res) => {
           _id: {
             $in: allMusics,
           },
-        }).exec((err, musicData) => {
+        }).populate({path:'uploadedBy', select:['name']}).exec((err, musicData) => {
           if (musicData !== null) {
             return res.send({ success: true, data: musicData });
           }

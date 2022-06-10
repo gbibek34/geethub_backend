@@ -9,6 +9,8 @@ const coverArtUpload = require('../file/coverArtUpload');
 const auth = require('../auth/auth');
 const path = require('path');
 const { route } = require('./authRoutes');
+const mm = require('music-metadata');
+const util = require('util');
 
 // upload new music
 router.post(
@@ -24,10 +26,21 @@ router.post(
     },
   ]),
   auth.verifyUser,
-  function (req, res) {
+  async function (req, res) {
     const audio = req.files.audio[0].path;
     const coverArt = req.files.coverArt[0].path;
     const name = req.body.name;
+
+    async function musicDuration() {
+      try {
+        const metadata = await mm.parseFile(audio);
+        // console.log(util.inspect(metadata, { showHidden: false, depth: null }));
+        const length = metadata.format.duration;
+        return length;
+      } catch (error) {
+        console.error(error.message);
+      }
+    };
 
     // Music.findOne({ name: name }).then((music) => {
     //   if (music) {
@@ -41,12 +54,14 @@ router.post(
     const uploadedBy = req.userInfo._id;
     const uploadedOn = new Date();
     const isPublished = true;
+    const length = await musicDuration();
 
     const musicData = new Music({
       name,
       description,
       genre,
       audio,
+      length,
       uploadedBy,
       uploadedOn,
       isPublished,
@@ -68,8 +83,8 @@ router.post(
 // list My Music
 router.get('/music/my', auth.verifyUser, function (req, res) {
   Music.find({
-    uploadedBy: req.userInfo._id, // change id to dynamic value
-  }).exec(function (err, result) {
+    uploadedBy: req.userInfo._id,
+  }).populate({path:'uploadedBy', select:['name']}).exec(function (err, result) {
     if (err) {
       res.status(400).json({ msg: 'Operation unsuccessful', success: false });
     } else {
@@ -88,7 +103,7 @@ router.get('/music/coverArt/:file(*)', (req, res) => {
 
 // Get all Music
 router.get('/music/all', auth.verifyUser, function (req, res) {
-  Music.find({}, function (err, result) {
+  Music.find({}).populate({path:'uploadedBy', select:['name']}).exec( function (err, result) {
     if (err) {
       res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
     } else {
@@ -100,7 +115,7 @@ router.get('/music/all', auth.verifyUser, function (req, res) {
 // Get music by id
 router.get('/music/get/:id', auth.verifyUser, function (req, res) {
   const id = req.params.id;
-  const music = Music.findOne({ _id: id }).then(function (musicData) {
+  Music.findOne({ _id: id }).populate({path:'uploadedBy', select:['name']}).then(function (musicData) {
     if (musicData != null) {
       res.status(200).json({ data: musicData, success: true });
     } else {
