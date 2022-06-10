@@ -97,12 +97,10 @@ router.get('/verify/:userId/:uniqueString', async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.params.userId });
     if (!user)
-      return res
-        .status(200)
-        .json({
-          msg: 'User does not exist try signup or check the link again',
-          success: false,
-        });
+      return res.status(200).json({
+        msg: 'User does not exist try signup or check the link again',
+        success: false,
+      });
     if (user.is_authenticated)
       return res
         .status(200)
@@ -112,12 +110,10 @@ router.get('/verify/:userId/:uniqueString', async (req, res) => {
       uniqueString: req.params.uniqueString,
     });
     if (!token)
-      return res
-        .status(200)
-        .json({
-          msg: 'Invalid link or token expired try logging in for new email',
-          success: false,
-        });
+      return res.status(200).json({
+        msg: 'Invalid link or token expired try logging in for new email',
+        success: false,
+      });
 
     await User.updateOne({ _id: user._id }, { is_authenticated: true });
     await token.remove();
@@ -152,6 +148,7 @@ router.post('/login', (req, res) => {
               .then((result) => {
                 if (result === null) {
                   sendVerificationEmail(savedUser, res);
+                  return res.status(200).json({msg: 'Verification email sent', success: false});
                 } else {
                   UserVerification.findOneAndDelete({ userId: savedUser._id })
                     .then(sendVerificationEmail(savedUser, res))
@@ -169,7 +166,7 @@ router.post('/login', (req, res) => {
               });
           } else {
             const token = jwt.sign({ _id: savedUser._id }, 'mysecretkey');
-            res.status(200).json({ token: token, success: true });
+            return res.status(200).json({ token: token, success: true });
           }
         } else {
           return res
