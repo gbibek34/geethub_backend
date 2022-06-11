@@ -31,7 +31,7 @@ const User = mongoose.model('User', {
     required: true,
   },
   profile_image: {
-    type: String,    
+    type: String,
   },
   followers: {
     type: Number,
@@ -43,10 +43,15 @@ const User = mongoose.model('User', {
       instagram: '',
       facebook: '',
       twitter: '',
-    }
+    },
   },
   bio: {
     type: String,
+  },
+  is_discoverable: {
+    type: Boolean,
+    default: true,
+    required: true,
   },
 });
 

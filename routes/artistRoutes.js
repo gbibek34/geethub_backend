@@ -9,15 +9,23 @@ const Music = require('../models/musicModel');
 // Search for Artist
 router.get('/artist/search/:searchkey', auth.verifyUser, (req, res) => {
   const searchkey = req.params.searchkey;
-  User.find({ name: { $regex: new RegExp(searchkey, 'i') } }, (err, result) => {
-    if (!err) {
-      return res.status(200).json({ success: true, data: result });
-    } else {
-      return res
-        .status(400)
-        .json({ msg: 'Something went wrong.', success: false });
+  User.find(
+    {
+      $and: [
+        { name: { $regex: new RegExp(searchkey, 'i') } },
+        { is_discoverable: true },
+      ],
+    },
+    (err, result) => {
+      if (!err) {
+        return res.status(200).json({ success: true, data: result });
+      } else {
+        return res
+          .status(400)
+          .json({ msg: 'Something went wrong.', success: false });
+      }
     }
-  });
+  );
 });
 
 //get profile of the artist
