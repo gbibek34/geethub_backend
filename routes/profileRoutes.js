@@ -7,14 +7,7 @@ const path = require('path');
 const auth = require('../auth/auth');
 const { default: mongoose } = require('mongoose');
 
-// Music.find({
-//   uploadedBy: req.userInfo._id,
-// })
-//   .count()
-
-// User.findById(req.userInfo._id)
-// .select("-_id -__v -joined_date -is_authenticated -password")
-
+// Get User Profile
 router.get('/user/profile', auth.verifyUser, (req, res) => {
   if (mongoose.Types.ObjectId.isValid(req.userInfo._id)) {
     User.findById(req.userInfo._id)
@@ -50,7 +43,7 @@ router.get('/user/profile', auth.verifyUser, (req, res) => {
 });
 
 // update user profile
-router.post(
+router.put(
   '/user/profile/update',
   auth.verifyUser,
   musicUpload.single('profile_image'),
@@ -75,10 +68,10 @@ router.post(
         { new: true }
       )
         .then((user) => {
-          res.status(200).json({ user, success: true });
+          return res.status(200).json({ data: user, success: true });
         })
         .catch((err) => {
-          res.status(400).json({ msg: err.message, success: false });
+          return res.status(400).json({ msg: err.message, success: false });
         });
     } else {
       User.findByIdAndUpdate(
@@ -93,12 +86,33 @@ router.post(
         { new: true }
       )
         .then((user) => {
-          res.status(200).json({ user, success: true });
+          return res.status(200).json({ data: user, success: true });
         })
         .catch((err) => {
-          res.status(400).json({ msg: err.message, success: false });
+          return res.status(400).json({ msg: err.message, success: false });
         });
     }
+  }
+);
+// change user discoverable status
+router.put(
+  '/user/profile/discoverable',
+  auth.verifyUser,
+  function (req, res) {
+    const is_discoverable = req.body.is_discoverable;
+    User.findByIdAndUpdate(
+      req.userInfo._id,
+      {
+        is_discoverable: is_discoverable,
+      },
+      { new: true }
+    )
+      .then((user) => {
+        return res.status(200).json({ data: user, success: true });
+      })
+      .catch((err) => {
+        return res.status(400).json({ msg: err.message, success: false });
+      });
   }
 );
 
