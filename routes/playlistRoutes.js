@@ -43,7 +43,6 @@ router.get('/playlist/getuserplaylist', auth.verifyUser, (req, res) => {
         .status(400)
         .json({ msg: 'Something went wrong', success: false });
     } else {
-      // console.log(docs.length);
       return res.status(200).json({ success: true, data: result });
     }
   });
@@ -82,8 +81,6 @@ router.post('/playlist/addmusic', auth.verifyUser, (req, res) => {
 
   Playlist.findOne({ _id: req.body.playlistId }).then(function (playlistData) {
     if (playlistData.createdBy.toString() === req.userInfo._id.toString()) {
-      console.log(musicId);
-      console.log(playlistData.playlistMusic);
       if (!playlistData.playlistMusic.includes(musicId)) {
         Playlist.findOneAndUpdate(
           { _id: req.body.playlistId },

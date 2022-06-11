@@ -48,6 +48,12 @@ const User = mongoose.model("User", {
   bio: {
     type: String,
   },
+  followed_by: [{ type: mongoose.Schema.Types.ObjectId}],
+  is_discoverable: {
+    type: Boolean,
+    default: true,
+    required: true,
+  },
 });
 
 module.exports = User;

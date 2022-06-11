@@ -94,5 +94,26 @@ router.put(
     }
   }
 );
+// change user discoverable status
+router.put(
+  '/user/profile/discoverable',
+  auth.verifyUser,
+  function (req, res) {
+    const is_discoverable = req.body.is_discoverable;
+    User.findByIdAndUpdate(
+      req.userInfo._id,
+      {
+        is_discoverable: is_discoverable,
+      },
+      { new: true }
+    )
+      .then((user) => {
+        return res.status(200).json({ data: user, success: true });
+      })
+      .catch((err) => {
+        return res.status(400).json({ msg: err.message, success: false });
+      });
+  }
+);
 
 module.exports = router;

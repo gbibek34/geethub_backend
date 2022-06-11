@@ -252,4 +252,21 @@ router.put(
   }
 );
 
+// Search for Music
+router.get('/music/search/:searchkey', auth.verifyUser, (req, res) => {
+  const searchkey = req.params.searchkey;
+  Music.find(
+    { name: { $regex: new RegExp(searchkey, 'i') } },
+    (err, result) => {
+      if (!err) {
+        return res.status(200).json({ success: true, data: result });
+      } else {
+        return res
+          .status(400)
+          .json({ msg: 'Something went wrong.', success: false });
+      }
+    }
+  );
+});
+
 module.exports = router;
