@@ -48,7 +48,7 @@ const User = mongoose.model('User', {
   bio: {
     type: String,
   },
-  followed_by: [{ type: mongoose.Schema.Types.ObjectId, ref: User }],
+  followed_by: [{ type: mongoose.Schema.Types.ObjectId}],
 });
 
 module.exports = User;

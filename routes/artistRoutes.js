@@ -24,11 +24,15 @@ router.get('/artist/search/:searchkey', auth.verifyUser, (req, res) => {
 router.get('/artist/profile/:id', auth.verifyUser, (req, res) => {
   const userid = req.params.id;
   User.find({ _id: userid }, (err, result) => {
+    if (!err) {
+      return res.send({ success: true, data: result[0] });
+    } else {
       return res
         .status(400)
         .json({ msg: 'Something went wrong.', success: false });
     }
-  )});
+  });
+});
 
 // get all the musics inside the playlist
 router.get('/artist/musics/:id', auth.verifyUser, (req, res) => {
@@ -82,8 +86,9 @@ router.put("/artist/unfollow", auth.verifyUser, function (req, res) {
   const userid = req.userInfo._id;
   const artistid = req.body.artistid;
   console.log("unfollow");
+  console.log(artistid);
   User.findOne({ _id: artistid }).then(function (artistData) {
-    if (!artistData.followed_by.includes(userid)) {
+    if (artistData.followed_by.includes(userid)) {
       User.findByIdAndUpdate(
         artistid,
         {
