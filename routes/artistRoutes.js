@@ -1,10 +1,11 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const Playlist = require("../models/playlistModel");
-const auth = require("../auth/auth");
-const path = require("path");
-const User = require("../models/userModel");
-const Music = require("../models/musicModel");
+const Playlist = require('../models/playlistModel');
+const auth = require('../auth/auth');
+const path = require('path');
+const User = require('../models/userModel');
+const Music = require('../models/musicModel');
+const ReportUser = require('../models/reportUserModel');
 
 // Search for Artist
 router.get('/artist/search/:searchkey', auth.verifyUser, (req, res) => {
@@ -29,7 +30,7 @@ router.get('/artist/search/:searchkey', auth.verifyUser, (req, res) => {
 });
 
 //get profile of the artist
-router.get("/artist/profile/:id", auth.verifyUser, (req, res) => {
+router.get('/artist/profile/:id', auth.verifyUser, (req, res) => {
   const userid = req.params.id;
   User.find({ _id: userid }, (err, result) => {
     if (!err) {
@@ -37,13 +38,13 @@ router.get("/artist/profile/:id", auth.verifyUser, (req, res) => {
     } else {
       return res
         .status(400)
-        .json({ msg: "Something went wrong.", success: false });
+        .json({ msg: 'Something went wrong.', success: false });
     }
   });
 });
 
 // get all the musics inside the playlist
-router.get("/artist/musics/:id", auth.verifyUser, (req, res) => {
+router.get('/artist/musics/:id', auth.verifyUser, (req, res) => {
   const artistid = req.params.id;
   Music.find({ uploadedBy: artistid }, (err, result) => {
     if (!err) {
@@ -51,16 +52,16 @@ router.get("/artist/musics/:id", auth.verifyUser, (req, res) => {
     } else {
       return res
         .status(400)
-        .json({ msg: "Something went wrong.", success: false });
+        .json({ msg: 'Something went wrong.', success: false });
     }
   });
 });
 
 //follow an artist
-router.put("/artist/follow", auth.verifyUser, function (req, res) {
+router.put('/artist/follow', auth.verifyUser, function (req, res) {
   const userid = req.userInfo._id;
   const artistid = req.body.artistid;
-  console.log("follow");
+  console.log('follow');
   User.findOne({ _id: artistid }).then(function (artistData) {
     if (!artistData.followed_by.includes(userid)) {
       User.findByIdAndUpdate(
@@ -75,25 +76,24 @@ router.put("/artist/follow", auth.verifyUser, function (req, res) {
             console.log(err);
             return res
               .status(400)
-              .json({ msg: "Something went wrong.", success: false });
+              .json({ msg: 'Something went wrong.', success: false });
           }
         }
       );
     } else {
       res.status(400).json({
-        msg: "You have already followed the artist",
+        msg: 'You have already followed the artist',
         success: false,
       });
     }
   });
 });
 
-
 //unfollow an artist
-router.put("/artist/unfollow", auth.verifyUser, function (req, res) {
+router.put('/artist/unfollow', auth.verifyUser, function (req, res) {
   const userid = req.userInfo._id;
   const artistid = req.body.artistid;
-  console.log("unfollow");
+  console.log('unfollow');
   console.log(artistid);
   User.findOne({ _id: artistid }).then(function (artistData) {
     if (artistData.followed_by.includes(userid)) {
@@ -109,22 +109,21 @@ router.put("/artist/unfollow", auth.verifyUser, function (req, res) {
             console.log(err);
             return res
               .status(400)
-              .json({ msg: "Something went wrong.", success: false });
+              .json({ msg: 'Something went wrong.', success: false });
           }
         }
       );
     } else {
       res.status(400).json({
-        msg: "You have already unfollowed the artist",
+        msg: 'You have already unfollowed the artist',
         success: false,
       });
     }
   });
 });
 
-
 //fetch all the artists followed by the user
-router.get("/artist/followed/all", auth.verifyUser, function (req, res) {
+router.get('/artist/followed/all', auth.verifyUser, function (req, res) {
   const userid = req.userInfo._id;
   User.find({ followed_by: { $in: [userid] } }, (err, result) => {
     if (!err) {
@@ -133,7 +132,7 @@ router.get("/artist/followed/all", auth.verifyUser, function (req, res) {
       console.log(err);
       return res
         .status(400)
-        .json({ msg: "Something went wrong.", success: false });
+        .json({ msg: 'Something went wrong.', success: false });
     }
   });
 });
