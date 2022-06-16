@@ -19,3 +19,25 @@ module.exports.verifyUser = function (req, res, next) {
     res.status(400).json({ msg: 'Invalid token', error: e });
   }
 };
+
+module.exports.verifyAdmin = function (req, res, next) {
+  try {
+    token = req.headers.authorization.split(" ")[1];
+    const data = jwt.verify(token, "mysecretkey");
+
+    User.findOne({ _id: data._id })
+      .then(function (result) {
+        if (result.is_admin) {
+          req.userInfo = result;
+          next();
+        } else {
+          res.status(400).json({ msg: "User is not an admin" });
+        }
+      })
+      .catch(function (e) {
+        res.status(400).json({ msg: "Invalid token", error: e });
+      });
+  } catch (e) {
+    res.status(400).json({ msg: "Invalid token", error: e });
+  }
+};

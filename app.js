@@ -35,12 +35,14 @@ const musicRoute = require('./routes/musicRoutes');
 const profileRoute = require('./routes/profileRoutes');
 const playlistRoute = require('./routes/playlistRoutes');
 const artistRoute= require('./routes/artistRoutes');
+const adminRoute = require('./routes/adminRoutes');
 
 app.use(artistRoute);
 app.use(profileRoute);
 app.use(authRoute);
 app.use(musicRoute);
 app.use(playlistRoute);
+app.use(adminRoute);
 //here
 app.get('/', (req, res) => {
   res.send('hello world');

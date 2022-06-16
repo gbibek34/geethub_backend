@@ -54,6 +54,15 @@ const User = mongoose.model('User', {
     default: true,
     required: true,
   },
+  verification_request: {
+    type: Boolean,
+    default: false,
+  },
+  is_admin: {
+    type: Boolean,
+    default: false,
+    required: true,
+  }
 });
 
 module.exports = User;
