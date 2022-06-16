@@ -30,12 +30,13 @@ app.use(function (req, res, next) {
   next();
 });
 
-const authRoute = require("./routes/authRoutes");
-const musicRoute = require("./routes/musicRoutes");
-const profileRoute = require("./routes/profileRoutes");
-const playlistRoute = require("./routes/playlistRoutes");
+const authRoute = require('./routes/authRoutes');
+const musicRoute = require('./routes/musicRoutes');
+const profileRoute = require('./routes/profileRoutes');
+const playlistRoute = require('./routes/playlistRoutes');
+const artistRoute = require('./routes/artistRoutes');
+const reportRoute = require('./routes/reportRoutes');
 const artistRoute = require("./routes/artistRoutes");
-const adminRoutes = require("./routes/adminRoutes.js");
 
 app.use(artistRoute);
 app.use(profileRoute);
@@ -43,6 +44,7 @@ app.use(authRoute);
 app.use(musicRoute);
 app.use(playlistRoute);
 app.use(adminRoutes);
+app.use(reportRoute);
 //here
 app.get("/", (req, res) => {
   res.send("hello world");
