@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const User = require('./userModel');
+const mongoose = require("mongoose");
+const User = require("./userModel");
 
-const ReportUser = mongoose.model('ReportUser', {
+const ReportUser = mongoose.model("ReportUser", {
   text: {
     type: String,
     required: true,
@@ -13,6 +13,10 @@ const ReportUser = mongoose.model('ReportUser', {
   reportedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: User,
+  },
+  reportedByUser: {
+    type: String,
+    required: true,
   },
   reportedOn: {
     type: Date,

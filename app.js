@@ -30,20 +30,20 @@ app.use(function (req, res, next) {
   next();
 });
 
-const authRoute = require('./routes/authRoutes');
-const musicRoute = require('./routes/musicRoutes');
-const profileRoute = require('./routes/profileRoutes');
-const playlistRoute = require('./routes/playlistRoutes');
-const artistRoute = require('./routes/artistRoutes');
-const reportRoute = require('./routes/reportRoutes');
+const authRoute = require("./routes/authRoutes");
+const musicRoute = require("./routes/musicRoutes");
+const profileRoute = require("./routes/profileRoutes");
+const playlistRoute = require("./routes/playlistRoutes");
 const artistRoute = require("./routes/artistRoutes");
+const reportRoute = require("./routes/reportRoutes");
+const adminRoute = require("./routes/adminRoutes");
 
 app.use(artistRoute);
 app.use(profileRoute);
 app.use(authRoute);
 app.use(musicRoute);
 app.use(playlistRoute);
-app.use(adminRoutes);
+app.use(adminRoute);
 app.use(reportRoute);
 //here
 app.get("/", (req, res) => {

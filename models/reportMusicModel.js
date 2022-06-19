@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
-const Music = require('./musicModel');
-const User = require('./userModel');
+const mongoose = require("mongoose");
+const Music = require("./musicModel");
+const User = require("./userModel");
 
-const ReportMusic = mongoose.model('ReportMusic', {
+const ReportMusic = mongoose.model("ReportMusic", {
   text: {
     type: String,
     required: true,
@@ -14,6 +14,10 @@ const ReportMusic = mongoose.model('ReportMusic', {
   reportedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: User,
+  },
+  reportedByUser: {
+    type: String,
+    required: true,
   },
   reportedOn: {
     type: Date,
