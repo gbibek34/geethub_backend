@@ -58,6 +58,11 @@ const User = mongoose.model("User", {
     type: Boolean,
     default: false,
   },
+  verification_request: {
+    type: Boolean,
+    default: false,
+  },
+ 
 });
 
 module.exports = User;

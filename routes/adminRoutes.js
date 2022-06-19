@@ -11,7 +11,7 @@ const ReportMusic = require("../models/reportMusicModel");
 const Music = require("../models/musicModel");
 const ReportUser = require("../models/reportUserModel");
 
-router.get("/admin/check", auth.VerifyAdmin, (req, res) => {
+router.get("/admin/check", auth.verifyAdmin, (req, res) => {
   const result = req.userInfo;
   if (!err) {
     return res.status(200).json({ success: true, data: result });
@@ -23,7 +23,7 @@ router.get("/admin/check", auth.VerifyAdmin, (req, res) => {
   }
 });
 
-router.get("/admin/allusers", auth.VerifyAdmin, (req, res) => {
+router.get("/admin/allusers", auth.verifyAdmin, (req, res) => {
   User.find({}, (err, result) => {
     if (!err) {
       return res.status(200).json({ success: true, data: result });
@@ -36,9 +36,87 @@ router.get("/admin/allusers", auth.VerifyAdmin, (req, res) => {
   });
 });
 
+
+
+
+// get verification user requests
+router.get("/admin/user/verification/requests", auth.verifyAdmin, (req, res) => {
+  User.find(
+    { $and: [{ is_verified: false }, { verification_request: true }] },
+    function (err, result) {
+      if (err) {
+        return res.status(400).json({
+          msg: "Something went wrong",
+          success: false,
+        });
+      } else {
+        return res.status(200).json({
+          data: result,
+          success: true,
+        });
+      }
+    }
+  );
+});
+
+// verifying verification request
+router.put("/admin/user/verify/:id", auth.verifyAdmin, function (req, res) {
+  const id = req.params.id;
+  User.findByIdAndUpdate(
+    id,
+    {
+      is_verified: true,
+    },
+    { new: true }
+  )
+    .then((user) => {
+      return res.status(200).json({ data: user, success: true });
+    })
+    .catch((err) => {
+      return res.status(400).json({ msg: err.message, success: false });
+    });
+});
+
+// reject verification request
+router.put("/admin/user/reject/:id", auth.verifyAdmin, function (req, res) {
+  const id = req.params.id;
+  User.findByIdAndUpdate(id, {
+    is_verified: false,
+    verification_request: false,
+  }).exec((err, user) => {
+    if (err) {
+      return res.status(400).json({
+        msg: "Something went wrong",
+        success: false,
+      });
+    } else {
+      const UserRejectData = new UserReject({
+        userId: user._id,
+      });
+      UserRejectData.save((err, data) => {
+        if (err) {
+          return res.status(400).json({
+            msg: "Something went wrong",
+            success: false,
+          });
+        } else {
+          return res.status(200).json({
+            data: data,
+            success: true,
+          });
+        }
+      });
+    }
+  });
+});
+
+
+
+
+///display all reported music
 router.get(
   "/admin/musicreport/all",
-  auth.VerifyAdmin,
+  auth.verifyAdmin,
   async function (req, res) {
     ReportMusic.find({}, (err, result) => {
       if (!err) {
@@ -55,7 +133,7 @@ router.get(
 
 router.get(
   "/admin/musicreport/pending",
-  auth.VerifyAdmin,
+  auth.verifyAdmin,
   async function (req, res) {
     ReportMusic.find(
       {
@@ -78,7 +156,7 @@ router.get(
 
 router.get(
   "/admin/musicreport/rejected",
-  auth.VerifyAdmin,
+  auth.verifyAdmin,
   async function (req, res) {
     ReportMusic.find(
       {
@@ -101,7 +179,7 @@ router.get(
 
 router.get(
   "/admin/musicreport/resolved",
-  auth.VerifyAdmin,
+  auth.verifyAdmin,
   async function (req, res) {
     ReportMusic.find(
       {
@@ -124,7 +202,7 @@ router.get(
 
 router.put(
   "/admin/musicreport/reject",
-  auth.VerifyAdmin,
+  auth.verifyAdmin,
   async function (req, res) {
     const reportid = req.body.reportid;
     ReportMusic.findByIdAndUpdate(reportid, {
@@ -142,7 +220,7 @@ router.put(
 
 router.put(
   "/admin/musicreport/resolve",
-  auth.VerifyAdmin,
+  auth.verifyAdmin,
   async function (req, res) {
     // const musicid= req.body.reportid;
     const reportid = req.body.reportid;
@@ -186,7 +264,7 @@ router.put(
 
 router.get(
   "/admin/musicreport/musics",
-  auth.VerifyAdmin,
+  auth.verifyAdmin,
   async function (req, res) {
     var musicid = [];
     ReportMusic.find({
@@ -219,7 +297,7 @@ router.get(
 
 router.get(
   "/admin/userreport/all",
-  auth.VerifyAdmin,
+  auth.verifyAdmin,
   async function (req, res) {
     ReportUser.find({}, (err, result) => {
       if (!err) {
@@ -236,7 +314,7 @@ router.get(
 
 router.put(
   "/admin/userreport/reject",
-  auth.VerifyAdmin,
+  auth.verifyAdmin,
   async function (req, res) {
     const reportid = req.body.reportid;
     ReportUser.findByIdAndUpdate(
@@ -257,7 +335,7 @@ router.put(
 
 router.put(
   "/admin/userreport/resolve",
-  auth.VerifyAdmin,
+  auth.verifyAdmin,
   async function (req, res) {
     // const musicid= req.body.reportid;
     const reportid = req.body.reportid;
@@ -301,7 +379,7 @@ router.put(
 
 router.get(
   "/admin/userreport/pending",
-  auth.VerifyAdmin,
+  auth.verifyAdmin,
   async function (req, res) {
     ReportUser.find(
       {
@@ -324,7 +402,7 @@ router.get(
 
 router.get(
   "/admin/userreport/rejected",
-  auth.VerifyAdmin,
+  auth.verifyAdmin,
   async function (req, res) {
     ReportUser.find(
       {
@@ -347,7 +425,7 @@ router.get(
 
 router.get(
   "/admin/userreport/resolved",
-  auth.VerifyAdmin,
+  auth.verifyAdmin,
   async function (req, res) {
     ReportUser.find(
       {
@@ -371,7 +449,7 @@ router.get(
 
 router.get(
   "/admin/userreport/users",
-  auth.VerifyAdmin,
+  auth.verifyAdmin,
   async function (req, res) {
     var userid = [];
     ReportUser.find({
