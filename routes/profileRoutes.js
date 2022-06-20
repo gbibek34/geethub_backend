@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/userModel');
 const Music = require('../models/musicModel');
+const UserReject = require('../models/userRejectModel');
 const musicUpload = require('../file/musicUpload');
 const path = require('path');
 const auth = require('../auth/auth');
@@ -94,6 +95,7 @@ router.put(
     }
   }
 );
+
 // change user discoverable status
 router.put(
   '/user/profile/discoverable',
@@ -115,5 +117,43 @@ router.put(
       });
   }
 );
+
+// verification request
+router.put("/user/profile/verification", auth.verifyUser, function (req, res) {
+  UserReject.findOne({
+    userId: req.userInfo._id,
+  }).exec((err, userReject) => {
+    if (err) {
+      return res.status(400).json({
+        msg: "Something went wrong",
+        success: false,
+      });
+    } else if (userReject) {
+      const rejectDate = userReject.createdAt;
+      const currentDate = new Date();
+      const differance = currentDate.getTime() - rejectDate.getTime();
+      const days = Math.floor(differance / (1000 * 60 * 60 * 24));
+      const remainingDays = 180 - days;
+      return res.status(400).json({
+        msg: "You previous request has been rejected. You can add new request after " + remainingDays + " days.",
+        success: false,
+      });
+    } else {
+      User.findByIdAndUpdate(
+        req.userInfo._id,
+        {
+          verification_request: true,
+        },
+        { new: true }
+      )
+        .then((user) => {
+          return res.status(200).json({ data: user, success: true });
+        })
+        .catch((err) => {
+          return res.status(400).json({ msg: err.message, success: false });
+        });
+    }
+  });
+});
 
 module.exports = router;

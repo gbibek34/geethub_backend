@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const User = mongoose.model('User', {
+const User = mongoose.model("User", {
   name: {
     type: String,
     required: true,
@@ -40,9 +40,9 @@ const User = mongoose.model('User', {
   social: {
     type: Object,
     default: {
-      instagram: '',
-      facebook: '',
-      twitter: '',
+      instagram: "",
+      facebook: "",
+      twitter: "",
     },
   },
   bio: {
@@ -54,6 +54,15 @@ const User = mongoose.model('User', {
     default: true,
     required: true,
   },
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
+  verification_request: {
+    type: Boolean,
+    default: false,
+  },
+ 
 });
 
 module.exports = User;
