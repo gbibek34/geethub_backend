@@ -36,7 +36,7 @@ const profileRoute = require("./routes/profileRoutes");
 const playlistRoute = require("./routes/playlistRoutes");
 const artistRoute = require("./routes/artistRoutes");
 const reportRoute = require("./routes/reportRoutes");
-const adminRoute = require("./routes/adminRoutes");
+const adminRoute = require("./routes/admin/adminRoutes");
 
 app.use(artistRoute);
 app.use(profileRoute);

@@ -1,15 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
-const User = require("../models/userModel");
-const UserVerification = require("../models/userVerificationModel");
+const User = require("../../models/userModel");
+const UserVerification = require("../../models/userVerificationModel");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
-const auth = require("../auth/auth");
+const auth = require("../../auth/auth");
 const jwt = require("jsonwebtoken");
-const ReportMusic = require("../models/reportMusicModel");
-const Music = require("../models/musicModel");
-const ReportUser = require("../models/reportUserModel");
+const ReportMusic = require("../../models/reportMusicModel");
+const Music = require("../../models/musicModel");
+const ReportUser = require("../../models/reportUserModel");
 
 router.get("/admin/check", auth.verifyAdmin, (req, res) => {
   const result = req.userInfo;
@@ -36,28 +36,29 @@ router.get("/admin/allusers", auth.verifyAdmin, (req, res) => {
   });
 });
 
-
-
-
 // get verification user requests
-router.get("/admin/user/verification/requests", auth.verifyAdmin, (req, res) => {
-  User.find(
-    { $and: [{ is_verified: false }, { verification_request: true }] },
-    function (err, result) {
-      if (err) {
-        return res.status(400).json({
-          msg: "Something went wrong",
-          success: false,
-        });
-      } else {
-        return res.status(200).json({
-          data: result,
-          success: true,
-        });
+router.get(
+  "/admin/user/verification/requests",
+  auth.verifyAdmin,
+  (req, res) => {
+    User.find(
+      { $and: [{ is_verified: false }, { verification_request: true }] },
+      function (err, result) {
+        if (err) {
+          return res.status(400).json({
+            msg: "Something went wrong",
+            success: false,
+          });
+        } else {
+          return res.status(200).json({
+            data: result,
+            success: true,
+          });
+        }
       }
-    }
-  );
-});
+    );
+  }
+);
 
 // verifying verification request
 router.put("/admin/user/verify/:id", auth.verifyAdmin, function (req, res) {
@@ -109,9 +110,6 @@ router.put("/admin/user/reject/:id", auth.verifyAdmin, function (req, res) {
     }
   });
 });
-
-
-
 
 ///display all reported music
 router.get(
@@ -276,9 +274,9 @@ router.get(
           musicid.push(d.reportedMusic);
         });
         Music.find({ _id: { $in: musicid } })
-          .then((data) => {
+          .then((musicdata) => {
             // console.log(data);
-            return res.status(200).json({ success: true, data: data });
+            return res.status(200).json({ success: true, data: musicdata });
           })
           .catch((error) => {
             return res
@@ -446,7 +444,6 @@ router.get(
   }
 );
 
-
 router.get(
   "/admin/userreport/users",
   auth.verifyAdmin,
@@ -461,9 +458,9 @@ router.get(
           userid.push(d.reportedUser);
         });
         User.find({ _id: { $in: userid } })
-          .then((data) => {
+          .then((userdata) => {
             // console.log(data);
-            return res.status(200).json({ success: true, data: data });
+            return res.status(200).json({ success: true, data: userdata });
           })
           .catch((error) => {
             return res
@@ -479,6 +476,5 @@ router.get(
       });
   }
 );
-
 
 module.exports = router;
