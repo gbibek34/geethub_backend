@@ -137,14 +137,95 @@ router.get('/playlist/musics/:id', auth.verifyUser, (req, res) => {
           _id: {
             $in: allMusics,
           },
-        }).populate({path:'uploadedBy', select:['name']}).exec((err, musicData) => {
-          if (musicData !== null) {
-            return res.send({ success: true, data: musicData });
-          }
-        });
+        })
+          .populate({ path: 'uploadedBy', select: ['name'] })
+          .exec((err, musicData) => {
+            if (musicData !== null) {
+              return res.send({ success: true, data: musicData });
+            }
+          });
       }
     }
   );
+});
+
+router.put('/playlist/music/remove', auth.verifyUser, (req, res) => {
+  const playlistId = req.body.playlistId;
+  const musicId = req.body.musicId;
+  Playlist.find({ _id: playlistId })
+    .then((playlistData) => {
+      if (
+        playlistData[0].createdBy.toString() === req.userInfo._id.toString()
+      ) {
+        Playlist.updateOne(
+          { _id: playlistId },
+          {
+            $pull: {
+              playlistMusic: musicId,
+            },
+          }
+        )
+          .then(() => {
+            return res.status(200).json({ data: musicId, success: true });
+          })
+          .catch((e) => {
+            return res.status(400).json({
+              msg: 'Could not remove music from playlist',
+              success: false,
+            });
+          });
+      } else {
+        return res
+          .status(400)
+          .json({ msg: 'You cannot edit this playlist', success: false });
+      }
+    })
+    .catch((e) => {
+      console.log(e);
+      return res
+        .status(400)
+        .json({ msg: 'Playlist not found', success: false });
+    });
+});
+
+router.put('/playlist/edit', auth.verifyUser, (req, res) => {
+  const playlistId = req.body.playlistId;
+  const name = req.body.name;
+  const description = req.body.description;
+  Playlist.find({ _id: playlistId })
+    .then((playlistData) => {
+      if (
+        playlistData[0].createdBy.toString() === req.userInfo._id.toString()
+      ) {
+        Playlist.findByIdAndUpdate(
+          playlistId,
+          {
+            name: name,
+            description: description,
+          },
+          { new: true }
+        )
+          .then((playlist) => {
+            return res.status(200).json({ data: playlist, success: true });
+          })
+          .catch((e) => {
+            return res.status(400).json({
+              msg: 'Could not update playlist',
+              success: false,
+            });
+          });
+      } else {
+        return res
+          .status(400)
+          .json({ msg: 'You cannot edit this playlist', success: false });
+      }
+    })
+    .catch((e) => {
+      console.log(e);
+      return res
+        .status(400)
+        .json({ msg: 'Playlist not found', success: false });
+    });
 });
 
 module.exports = router;

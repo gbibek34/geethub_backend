@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const User = require('../models/userModel');
@@ -14,14 +14,14 @@ const util = require('util');
 
 // upload new music
 router.post(
-  "/music/new",
+  '/music/new',
   musicUpload.fields([
     {
-      name: "audio",
+      name: 'audio',
       maxCount: 1,
     },
     {
-      name: "coverArt",
+      name: 'coverArt',
       maxCount: 1,
     },
   ]),
@@ -40,7 +40,7 @@ router.post(
       } catch (error) {
         console.error(error.message);
       }
-    };
+    }
 
     // Music.findOne({ name: name }).then((music) => {
     //   if (music) {
@@ -75,57 +75,63 @@ router.post(
       })
       .catch(function (e) {
         console.log(e);
-        res.status(400).json({ msg: "An error occurred", success: false });
+        res.status(400).json({ msg: 'An error occurred', success: false });
       });
   }
 );
 
 // list My Music
-router.get("/music/my", auth.verifyUser, function (req, res) {
+router.get('/music/my', auth.verifyUser, function (req, res) {
   Music.find({
     uploadedBy: req.userInfo._id,
-  }).populate({path:'uploadedBy', select:['name']}).exec(function (err, result) {
-    if (err) {
-      res.status(400).json({ msg: "Operation unsuccessful", success: false });
-    } else {
-      res.status(200).json({ data: result, success: true });
-    }
-  });
+  })
+    .populate({ path: 'uploadedBy', select: ['name'] })
+    .exec(function (err, result) {
+      if (err) {
+        res.status(400).json({ msg: 'Operation unsuccessful', success: false });
+      } else {
+        res.status(200).json({ data: result, success: true });
+      }
+    });
 });
 
 // Fetch image
-router.get("/music/coverArt/:file(*)", (req, res) => {
+router.get('/music/coverArt/:file(*)', (req, res) => {
   let file = req.params.file;
-  let fileLocation = path.join("/music/", file);
+  let fileLocation = path.join('/music/', file);
   //res.send({image: fileLocation});
   res.sendFile(__dirname.slice(0, -7) + `${fileLocation}`);
 });
 
 // Get all Music
 router.get('/music/all', auth.verifyUser, function (req, res) {
-  Music.find({}).populate({path:'uploadedBy', select:['name']}).exec( function (err, result) {
-    if (err) {
-      res.status(400).json({ msg: "Operation Unsuccessful", success: false });
-    } else {
-      res.status(200).json({ data: result, success: true });
-    }
-  });
+  Music.find({})
+    .populate({ path: 'uploadedBy', select: ['name'] })
+    .exec(function (err, result) {
+      if (err) {
+        res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
+      } else {
+        res.status(200).json({ data: result, success: true });
+      }
+    });
 });
 
 // Get music by id
-router.get("/music/get/:id", auth.verifyUser, function (req, res) {
+router.get('/music/get/:id', auth.verifyUser, function (req, res) {
   const id = req.params.id;
-  Music.findOne({ _id: id }).populate({path:'uploadedBy', select:['name']}).then(function (musicData) {
-    if (musicData != null) {
-      res.status(200).json({ data: musicData, success: true });
-    } else {
-      res.status(400).json({ msg: "Operation Unsuccessful", success: false });
-    }
-  });
+  Music.findOne({ _id: id })
+    .populate({ path: 'uploadedBy', select: ['name'] })
+    .then(function (musicData) {
+      if (musicData != null) {
+        res.status(200).json({ data: musicData, success: true });
+      } else {
+        res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
+      }
+    });
 });
 
 //like a music
-router.put("/music/like", auth.verifyUser, function (req, res) {
+router.put('/music/like', auth.verifyUser, function (req, res) {
   const userid = req.userInfo._id;
   const musicid = req.body.musicid;
   Music.findOne({ _id: musicid }).then(function (musicData) {
@@ -142,13 +148,13 @@ router.put("/music/like", auth.verifyUser, function (req, res) {
             console.log(err);
             return res
               .status(400)
-              .json({ msg: "Something went wrong.", success: false });
+              .json({ msg: 'Something went wrong.', success: false });
           }
         }
       );
     } else {
       res.status(400).json({
-        msg: "You have already liked the music",
+        msg: 'You have already liked the music',
         success: false,
       });
     }
@@ -156,11 +162,10 @@ router.put("/music/like", auth.verifyUser, function (req, res) {
 });
 
 //unlike a music
-router.put("/music/unlike", auth.verifyUser, function (req, res) {
+router.put('/music/unlike', auth.verifyUser, function (req, res) {
   const userid = req.userInfo._id;
   const musicid = req.body.musicid;
   Music.findOne({ _id: musicid }).then(function (musicData) {
-    console.log(musicData.likes.includes(userid));
     if (musicData.likes.includes(userid)) {
       Music.findByIdAndUpdate(
         req.body.musicid,
@@ -174,13 +179,13 @@ router.put("/music/unlike", auth.verifyUser, function (req, res) {
             console.log(err);
             return res
               .status(400)
-              .json({ msg: "Something went wrong.", success: false });
+              .json({ msg: 'Something went wrong.', success: false });
           }
         }
       );
     } else {
       res.status(400).json({
-        msg: "You have already unliked the music",
+        msg: 'You have already unliked the music',
         success: false,
       });
     }
@@ -188,7 +193,7 @@ router.put("/music/unlike", auth.verifyUser, function (req, res) {
 });
 
 //fetch all the music like by the user
-router.get("/music/liked/all", auth.verifyUser, function (req, res) {
+router.get('/music/liked/all', auth.verifyUser, function (req, res) {
   const userid = req.userInfo._id;
   Music.find({ likes: { $in: [userid] } }, (err, result) => {
     if (!err) {
@@ -197,58 +202,75 @@ router.get("/music/liked/all", auth.verifyUser, function (req, res) {
       console.log(err);
       return res
         .status(400)
-        .json({ msg: "Something went wrong.", success: false });
+        .json({ msg: 'Something went wrong.', success: false });
     }
   });
 });
 
 // Edit Music
 router.put(
-  '/music/edit/:id', auth.verifyUser, musicUpload.single('coverArt'), function (req, res) {
+  '/music/edit/:id',
+  auth.verifyUser,
+  musicUpload.single('coverArt'),
+  function (req, res) {
     const uploadedBy = req.userInfo._id;
     const id = req.params.id;
-    Music.findOne({ _id: id }).then(function (musicData) {
-      if (musicData.uploadedBy.toString() === uploadedBy.toString()) {
-        const name = req.body.name;
-        const description = req.body.description;
-        const genre = req.body.genre;
+    Music.findOne({ _id: id })
+      .then(function (musicData) {
+        if (musicData.uploadedBy.toString() === uploadedBy.toString()) {
+          const name = req.body.name;
+          const description = req.body.description;
+          const genre = req.body.genre;
 
-        if (req.file) {
-          coverArt = req.file.path;
-          Music.findOneAndUpdate({ _id: id }, {
-            name,
-            description,
-            genre,
-            coverArt,
-          }, function (err, result) {
-            if (err) {
-              res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
-            } else {
-              res.status(200).json({ data: result, success: true });
-            }
-          });
+          if (req.file) {
+            coverArt = req.file.path;
+            Music.findOneAndUpdate(
+              { _id: id },
+              {
+                name,
+                description,
+                genre,
+                coverArt,
+              },
+              function (err, result) {
+                if (err) {
+                  res
+                    .status(400)
+                    .json({ msg: 'Operation Unsuccessful', success: false });
+                } else {
+                  res.status(200).json({ data: result, success: true });
+                }
+              }
+            );
+          } else {
+            Music.findOneAndUpdate(
+              { _id: id },
+              {
+                name,
+                description,
+                genre,
+              },
+              function (err, result) {
+                if (err) {
+                  res
+                    .status(400)
+                    .json({ msg: 'Operation Unsuccessful', success: false });
+                } else {
+                  res.status(200).json({ data: result, success: true });
+                }
+              }
+            );
+          }
         } else {
-          Music.findOneAndUpdate({ _id: id }, {
-            name,
-            description,
-            genre,
-          }, function (err, result) {
-            if (err) {
-              res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
-            } else {
-              res.status(200).json({ data: result, success: true });
-            }
+          res.status(400).json({
+            msg: 'You cannot edit this music',
+            success: false,
           });
         }
-      } else {
-        res.status(400).json({
-          msg: 'You cannot edit this music',
-          success: false,
-        });
-      }
-    }).catch((err) => {
-      res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
-    })
+      })
+      .catch((err) => {
+        res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
+      });
   }
 );
 
