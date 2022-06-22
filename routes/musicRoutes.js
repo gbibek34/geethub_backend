@@ -318,4 +318,18 @@ router.get(
   }
 );
 
+router.put('/music/:musicid/views', auth.verifyUser, (req, res) => {
+  const musicId = req.params.musicid;
+  console.log('hit');
+  Music.findOneAndUpdate(musicId, {
+    $inc: { views: 1 },
+  })
+    .then((musicData) => {
+      return res.status(200).json({ msg: 'Update view count', success: true });
+    })
+    .catch((e) => {
+      return res.status(400).json({ msg: e.data, success: false });
+    });
+});
+
 module.exports = router;
