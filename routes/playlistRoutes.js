@@ -1,20 +1,20 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Playlist = require('../models/playlistModel');
-const auth = require('../auth/auth');
-const path = require('path');
+const Playlist = require("../models/playlistModel");
+const auth = require("../auth/auth");
+const path = require("path");
 
-const Music = require('../models/musicModel');
+const Music = require("../models/musicModel");
 //create new playlist
-router.post('/playlist/create', auth.verifyUser, (req, res) => {
+router.post("/playlist/create", auth.verifyUser, (req, res) => {
   const name = req.body.name;
   const description = req.body.description;
   const createdBy = req.userInfo._id;
   var date_ob = new Date();
-  var day = ('0' + date_ob.getDate()).slice(-2);
-  var month = ('0' + (date_ob.getMonth() + 1)).slice(-2);
+  var day = ("0" + date_ob.getDate()).slice(-2);
+  var month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
   var year = date_ob.getFullYear();
-  var date = year + '-' + month + '-' + day;
+  var date = year + "-" + month + "-" + day;
   const playlistData = new Playlist({
     createdBy,
     name,
@@ -29,19 +29,19 @@ router.post('/playlist/create', auth.verifyUser, (req, res) => {
     })
     .catch(function (e) {
       console.log(e);
-      res.status(400).json({ msg: 'An error occured', success: false });
+      res.status(400).json({ msg: "An error occured", success: false });
     });
 });
 
 //get the playlist of current user
-router.get('/playlist/getuserplaylist', auth.verifyUser, (req, res) => {
+router.get("/playlist/getuserplaylist", auth.verifyUser, (req, res) => {
   const createdBy = req.userInfo.id;
   Playlist.find({ createdBy: createdBy }, (err, result) => {
     if (err) {
       console.log(err);
       return res
         .status(400)
-        .json({ msg: 'Something went wrong', success: false });
+        .json({ msg: "Something went wrong", success: false });
     } else {
       return res.status(200).json({ success: true, data: result });
     }
@@ -49,20 +49,20 @@ router.get('/playlist/getuserplaylist', auth.verifyUser, (req, res) => {
 });
 
 //get all the playlists
-router.get('/playlist/all', auth.verifyUser, (req, res) => {
+router.get("/playlist/all", auth.verifyUser, (req, res) => {
   Playlist.find({}, (err, result) => {
     if (!err) {
       return res.send({ success: true, count: docs.length, data: result });
     } else {
       return res
         .status(400)
-        .json({ msg: 'Something went wrong.', success: false });
+        .json({ msg: "Something went wrong.", success: false });
     }
   });
 });
 
 //get the details of any playlist by id
-router.get('/playlist/details/:id', auth.verifyUser, (req, res) => {
+router.get("/playlist/details/:id", auth.verifyUser, (req, res) => {
   const playlistId = req.params.id;
   Playlist.find({ _id: playlistId }, (err, result) => {
     if (!err) {
@@ -70,13 +70,13 @@ router.get('/playlist/details/:id', auth.verifyUser, (req, res) => {
     } else {
       return res
         .status(400)
-        .json({ msg: 'Something went wrong.', success: false });
+        .json({ msg: "Something went wrong.", success: false });
     }
   });
 });
 
 // add new music to playlist
-router.post('/playlist/addmusic', auth.verifyUser, (req, res) => {
+router.post("/playlist/addmusic", auth.verifyUser, (req, res) => {
   const musicId = req.body.musicId;
 
   Playlist.findOne({ _id: req.body.playlistId }).then(function (playlistData) {
@@ -96,19 +96,19 @@ router.post('/playlist/addmusic', auth.verifyUser, (req, res) => {
               console.log(err);
               return res
                 .status(400)
-                .json({ msg: 'Something went wrong.', success: false });
+                .json({ msg: "Something went wrong.", success: false });
             }
           }
         );
       } else {
         res.status(400).json({
-          msg: 'Music already exists in this playlist',
+          msg: "Music already exists in this playlist",
           success: false,
         });
       }
     } else {
       res.status(400).json({
-        msg: 'You cannot edit this playlist',
+        msg: "You cannot edit this playlist",
         success: false,
       });
     }
@@ -116,7 +116,7 @@ router.post('/playlist/addmusic', auth.verifyUser, (req, res) => {
 });
 
 // get all the musics inside the playlist
-router.get('/playlist/musics/:id', auth.verifyUser, (req, res) => {
+router.get("/playlist/musics/:id", auth.verifyUser, (req, res) => {
   const playlistId = req.params.id;
   Playlist.find(
     { _id: playlistId },
@@ -125,7 +125,7 @@ router.get('/playlist/musics/:id', auth.verifyUser, (req, res) => {
       if (err) {
         return res
           .status(400)
-          .json({ msg: 'Something went wrong.', success: false });
+          .json({ msg: "Something went wrong.", success: false });
       } else {
         let allMusics = [];
 
@@ -137,14 +137,34 @@ router.get('/playlist/musics/:id', auth.verifyUser, (req, res) => {
           _id: {
             $in: allMusics,
           },
-        }).populate({path:'uploadedBy', select:['name']}).exec((err, musicData) => {
-          if (musicData !== null) {
-            return res.send({ success: true, data: musicData });
-          }
-        });
+        })
+          .populate({ path: "uploadedBy", select: ["name"] })
+          .exec((err, musicData) => {
+            if (musicData !== null) {
+              return res.send({ success: true, data: musicData });
+            }
+          });
       }
     }
   );
 });
 
 module.exports = router;
+
+router.post("/playlist/delete", auth.verifyUser, (req, res) => {
+
+  const playlistid = req.body.playlistid;
+  console.log(playlistid);
+  Playlist.findOneAndDelete({ _id: playlistid }, (err, result) => {
+    if (!err) {
+      return res.status(200).json({
+        msg: "Playlist deleted sucessfully",
+        success: true,
+      });
+    } else {
+      return res
+        .status(400)
+        .json({ msg: "Something went wrong.", success: false });
+    }
+  });
+});
