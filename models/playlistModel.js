@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
-const Music = require("./musicModel");
+const mongoose = require('mongoose');
+const Music = require('./musicModel');
 
-const Playlist = new mongoose.model("Playlist", {
+const Playlist = mongoose.model('Playlist', {
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
   },

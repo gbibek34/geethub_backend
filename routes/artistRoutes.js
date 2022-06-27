@@ -61,7 +61,6 @@ router.get('/artist/musics/:id', auth.verifyUser, (req, res) => {
 router.put('/artist/follow', auth.verifyUser, function (req, res) {
   const userid = req.userInfo._id;
   const artistid = req.body.artistid;
-  console.log('follow');
   User.findOne({ _id: artistid }).then(function (artistData) {
     if (!artistData.followed_by.includes(userid)) {
       User.findByIdAndUpdate(
@@ -93,8 +92,6 @@ router.put('/artist/follow', auth.verifyUser, function (req, res) {
 router.put('/artist/unfollow', auth.verifyUser, function (req, res) {
   const userid = req.userInfo._id;
   const artistid = req.body.artistid;
-  console.log('unfollow');
-  console.log(artistid);
   User.findOne({ _id: artistid }).then(function (artistData) {
     if (artistData.followed_by.includes(userid)) {
       User.findByIdAndUpdate(

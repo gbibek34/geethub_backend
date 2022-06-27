@@ -168,7 +168,6 @@ router.put("/music/unlike", auth.verifyUser, function (req, res) {
   const userid = req.userInfo._id;
   const musicid = req.body.musicid;
   Music.findOne({ _id: musicid }).then(function (musicData) {
-    console.log(musicData.likes.includes(userid));
     if (musicData.likes.includes(userid)) {
       Music.findByIdAndUpdate(
         req.body.musicid,
@@ -381,6 +380,20 @@ router.post("/music/delete", auth.verifyUser, (req, res) => {
         .json({ msg: "Something went wrong.", success: false });
     }
   });
+});
+
+router.put("/music/:musicid/views", auth.verifyUser, (req, res) => {
+  const musicId = req.params.musicid;
+  console.log("hit");
+  Music.findOneAndUpdate(musicId, {
+    $inc: { views: 1 },
+  })
+    .then((musicData) => {
+      return res.status(200).json({ msg: "Update view count", success: true });
+    })
+    .catch((e) => {
+      return res.status(400).json({ msg: e.data, success: false });
+    });
 });
 
 module.exports = router;

@@ -12,11 +12,11 @@ module.exports.verifyUser = function (req, res, next) {
         next();
       })
       .catch(function (e) {
-        console.log(e)
+        console.log(e);
         res.status(400).json({ msg: "Invalid token", error: e });
       });
   } catch (e) {
-    console.log(e)
+    console.log(e);
     res.status(400).json({ msg: "Invalid token", error: e });
   }
 };
