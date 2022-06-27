@@ -321,6 +321,7 @@ router.get(
   }
 );
 
+//delete music
 router.post("/music/delete", auth.verifyUser, (req, res) => {
   const musicid = req.body.musicid;
   console.log(musicid);

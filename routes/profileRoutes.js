@@ -158,6 +158,7 @@ router.put("/user/profile/verification", auth.verifyUser, function (req, res) {
   });
 });
 
+// delete profile
 router.post("/user/delete", auth.verifyUser, (req, res) => {
   const userid = req.userInfo._id;
   console.log(userid);
@@ -211,50 +212,5 @@ router.post("/user/delete", auth.verifyUser, (req, res) => {
     }
   });
 });
-
-// router.post("/user/delete", auth.verifyUser, (req, res) => {
-//   const userid = req.userInfo._id;
-
-//   User.findOne({ _id: userid }, (err, result) => {
-//     if (!err) {
-//       ReportUser.updateMany(
-//         { reportedUser: userid },
-//         {
-//           isRejected: false,
-//           isResolved: true,
-//         }
-//       );
-//     } else {
-//       console.log(err);
-//       return res
-//         .status(400)
-//         .json({ msg: "Something went wrong. 2", success: false });
-//     }
-//   }).then((result) => {
-//     Playlist.deleteManny({
-//       createdBy: userid,
-//     })
-//       .then(
-//         User.findOneAndDelete({ _id: userid }, (err, result) => {
-//           if (!err) {
-//             return res.status(200).json({
-//               msg: "User deleted sucessfully",
-//               success: true,
-//             });
-//           } else {
-//             return res
-//               .status(400)
-//               .json({ msg: "Something went wrong. 1", success: false });
-//           }
-//         })
-//       )
-//       .catch((e) => {
-//         console.log(e);
-//         return res
-//           .status(400)
-//           .json({ msg: "Something went wrong. 2", success: false });
-//       });
-//   });
-// });
 
 module.exports = router;

@@ -149,8 +149,7 @@ router.get("/playlist/musics/:id", auth.verifyUser, (req, res) => {
   );
 });
 
-module.exports = router;
-
+// delete playlist
 router.post("/playlist/delete", auth.verifyUser, (req, res) => {
 
   const playlistid = req.body.playlistid;
@@ -168,3 +167,5 @@ router.post("/playlist/delete", auth.verifyUser, (req, res) => {
     }
   });
 });
+
+module.exports = router;
