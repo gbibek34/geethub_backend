@@ -315,22 +315,20 @@ router.put(
   auth.verifyAdmin,
   async function (req, res) {
     const reportid = req.body.reportid;
-    ReportUser.findByIdAndUpdate(
-      reportid,
-      {
-        isRejected: true,
-        isResolved: false,
-      }
-        .then((result) => {
-          return res.status(200).json({ data: result, success: true });
-        })
-        .catch((err) => {
-          return res.status(400).json({ msg: err.message, success: false });
-        })
-    );
+    ReportUser.findByIdAndUpdate(reportid, {
+      isRejected: true,
+      isResolved: false,
+    })
+      .then((result) => {
+        return res.status(200).json({ data: result, success: true });
+      })
+      .catch((err) => {
+        return res.status(400).json({ msg: err.message, success: false });
+      });
   }
 );
 
+//resolve the report of user
 router.put(
   "/admin/userreport/resolve",
   auth.verifyAdmin,
@@ -454,12 +452,14 @@ router.get(
       isResolved: false,
     })
       .then((data) => {
+        console.log(data);
         data.map((d, k) => {
           userid.push(d.reportedUser);
         });
+        console.log(userid);
         User.find({ _id: { $in: userid } })
           .then((userdata) => {
-            // console.log(data);
+            console.log(userdata);
             return res.status(200).json({ success: true, data: userdata });
           })
           .catch((error) => {

@@ -64,6 +64,8 @@ router.post("/report/artist", auth.verifyUser, async function (req, res) {
   const reportedBy = req.userInfo._id;
   const reportedOn = new Date();
 
+  console.log(reportedUser);
+
   ReportUser.find({ reportedBy, reportedUser }).then(function (reportUserData) {
     if (reportUserData.length > 0) {
       if (reportUserData[0].isRejected === true) {
