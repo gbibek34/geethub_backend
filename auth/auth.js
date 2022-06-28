@@ -6,16 +6,17 @@ module.exports.verifyUser = function (req, res, next) {
   try {
     token = req.headers.authorization.split(" ")[1];
     const data = jwt.verify(token, "mysecretkey");
-
     User.findOne({ _id: data._id })
       .then(function (result) {
         req.userInfo = result;
         next();
       })
       .catch(function (e) {
+        console.log(e);
         res.status(400).json({ msg: "Invalid token", error: e });
       });
   } catch (e) {
+    console.log(e);
     res.status(400).json({ msg: "Invalid token", error: e });
   }
 };
