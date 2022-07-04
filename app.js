@@ -38,6 +38,7 @@ const artistRoute = require('./routes/artistRoutes');
 const reportRoute = require('./routes/reportRoutes');
 const adminRoute = require('./routes/admin/adminRoutes');
 const transactionRoute = require('./routes/transactionRoutes');
+const monetizationRoute = require('./routes/admin/monetizationRoute')
 
 app.use(artistRoute);
 app.use(profileRoute);
@@ -47,6 +48,7 @@ app.use(playlistRoute);
 app.use(transactionRoute);
 app.use(adminRoute);
 app.use(reportRoute);
+app.use(monetizationRoute);
 
 //here
 app.get('/', (req, res) => {

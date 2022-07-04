@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../auth/auth');
-const path = require('path');
 const User = require('../models/userModel');
-const Music = require('../models/musicModel');
 const TransactionHistory = require('../models/transactionHistoryModel');
 
 // route to load money
