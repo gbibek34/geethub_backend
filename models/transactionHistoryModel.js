@@ -23,6 +23,10 @@ const TransactionHistory = mongoose.model('TransactionHistory', {
     type: Date,
     required: true,
   },
+  remarks: {
+    type: String,
+    default: "self",
+  },
 });
 
 module.exports = TransactionHistory;
