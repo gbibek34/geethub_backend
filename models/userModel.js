@@ -62,7 +62,10 @@ const User = mongoose.model("User", {
     type: Boolean,
     default: false,
   },
- 
+  balance: {
+    type: Number,
+    default: 0,
+  },
 });
 
 module.exports = User;
