@@ -9,16 +9,16 @@ const TransactionHistory = require('../models/transactionHistoryModel');
 // route to load money
 router.put('/transaction/load', auth.verifyUser, (req, res) => {
   const amount = req.body.amount;
-  const receivedBy = req.userInfo._id;
+  const sentBy = req.userInfo._id;
   const date = new Date();
 
-  User.findOneAndUpdate(receivedBy, {
+  User.findOneAndUpdate(sentBy, {
     $inc: { coins: amount },
   })
     .then((userData) => {
       const transactionHistory = new TransactionHistory({
         amount,
-        receivedBy,
+        sentBy,
         date,
         type: 'Load',
       });

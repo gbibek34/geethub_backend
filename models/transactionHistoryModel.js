@@ -10,7 +10,7 @@ const TransactionHistory = mongoose.model('TransactionHistory', {
     type: Number,
     required: true,
   },
-  receivedBy: {
+  sentBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: User,
     required: true,
