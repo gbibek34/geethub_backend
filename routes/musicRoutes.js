@@ -1,29 +1,29 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const mongoose = require("mongoose");
-const User = require("../models/userModel");
-const Music = require("../models/musicModel");
-const multer = require("multer");
-const musicUpload = require("../file/musicUpload");
-const coverArtUpload = require("../file/coverArtUpload");
-const auth = require("../auth/auth");
-const path = require("path");
-const { route } = require("./authRoutes");
-const mm = require("music-metadata");
-const util = require("util");
-const ReportMusic = require("../models/reportMusicModel");
-const Playlist = require("../models/playlistModel");
+const mongoose = require('mongoose');
+const User = require('../models/userModel');
+const Music = require('../models/musicModel');
+const multer = require('multer');
+const musicUpload = require('../file/musicUpload');
+const coverArtUpload = require('../file/coverArtUpload');
+const auth = require('../auth/auth');
+const path = require('path');
+const { route } = require('./authRoutes');
+const mm = require('music-metadata');
+const util = require('util');
+const ReportMusic = require('../models/reportMusicModel');
+const Playlist = require('../models/playlistModel');
 
 // upload new music
 router.post(
-  "/music/new",
+  '/music/new',
   musicUpload.fields([
     {
-      name: "audio",
+      name: 'audio',
       maxCount: 1,
     },
     {
-      name: "coverArt",
+      name: 'coverArt',
       maxCount: 1,
     },
   ]),
@@ -73,24 +73,26 @@ router.post(
     musicData
       .save()
       .then(function () {
-        res.status(200).json({ data: musicData, success: true });
+        return res.status(200).json({ data: musicData, success: true });
       })
       .catch(function (e) {
         console.log(e);
-        res.status(400).json({ msg: "An error occurred", success: false });
+        return res
+          .status(400)
+          .json({ msg: 'An error occurred', success: false });
       });
   }
 );
 
 // list My Music
-router.get("/music/my", auth.verifyUser, function (req, res) {
+router.get('/music/my', auth.verifyUser, function (req, res) {
   Music.find({
     uploadedBy: req.userInfo._id,
   })
-    .populate({ path: "uploadedBy", select: ["name"] })
+    .populate({ path: 'uploadedBy', select: ['name'] })
     .exec(function (err, result) {
       if (err) {
-        res.status(400).json({ msg: "Operation unsuccessful", success: false });
+        res.status(400).json({ msg: 'Operation unsuccessful', success: false });
       } else {
         res.status(200).json({ data: result, success: true });
       }
@@ -98,20 +100,20 @@ router.get("/music/my", auth.verifyUser, function (req, res) {
 });
 
 // Fetch image
-router.get("/music/coverArt/:file(*)", (req, res) => {
+router.get('/music/coverArt/:file(*)', (req, res) => {
   let file = req.params.file;
-  let fileLocation = path.join("/music/", file);
+  let fileLocation = path.join('/music/', file);
   //res.send({image: fileLocation});
   res.sendFile(__dirname.slice(0, -7) + `${fileLocation}`);
 });
 
 // Get all Music
-router.get("/music/all", auth.verifyUser, function (req, res) {
+router.get('/music/all', auth.verifyUser, function (req, res) {
   Music.find({})
-    .populate({ path: "uploadedBy", select: ["name"] })
+    .populate({ path: 'uploadedBy', select: ['name'] })
     .exec(function (err, result) {
       if (err) {
-        res.status(400).json({ msg: "Operation Unsuccessful", success: false });
+        res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
       } else {
         res.status(200).json({ data: result, success: true });
       }
@@ -119,21 +121,21 @@ router.get("/music/all", auth.verifyUser, function (req, res) {
 });
 
 // Get music by id
-router.get("/music/get/:id", auth.verifyUser, function (req, res) {
+router.get('/music/get/:id', auth.verifyUser, function (req, res) {
   const id = req.params.id;
   Music.findOne({ _id: id })
-    .populate({ path: "uploadedBy", select: ["name"] })
+    .populate({ path: 'uploadedBy', select: ['name'] })
     .then(function (musicData) {
       if (musicData != null) {
         res.status(200).json({ data: musicData, success: true });
       } else {
-        res.status(400).json({ msg: "Operation Unsuccessful", success: false });
+        res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
       }
     });
 });
 
 //like a music
-router.put("/music/like", auth.verifyUser, function (req, res) {
+router.put('/music/like', auth.verifyUser, function (req, res) {
   const userid = req.userInfo._id;
   const musicid = req.body.musicid;
   Music.findOne({ _id: musicid }).then(function (musicData) {
@@ -150,13 +152,13 @@ router.put("/music/like", auth.verifyUser, function (req, res) {
             console.log(err);
             return res
               .status(400)
-              .json({ msg: "Something went wrong.", success: false });
+              .json({ msg: 'Something went wrong.', success: false });
           }
         }
       );
     } else {
       res.status(400).json({
-        msg: "You have already liked the music",
+        msg: 'You have already liked the music',
         success: false,
       });
     }
@@ -164,7 +166,7 @@ router.put("/music/like", auth.verifyUser, function (req, res) {
 });
 
 //unlike a music
-router.put("/music/unlike", auth.verifyUser, function (req, res) {
+router.put('/music/unlike', auth.verifyUser, function (req, res) {
   const userid = req.userInfo._id;
   const musicid = req.body.musicid;
   Music.findOne({ _id: musicid }).then(function (musicData) {
@@ -181,13 +183,13 @@ router.put("/music/unlike", auth.verifyUser, function (req, res) {
             console.log(err);
             return res
               .status(400)
-              .json({ msg: "Something went wrong.", success: false });
+              .json({ msg: 'Something went wrong.', success: false });
           }
         }
       );
     } else {
       res.status(400).json({
-        msg: "You have already unliked the music",
+        msg: 'You have already unliked the music',
         success: false,
       });
     }
@@ -195,7 +197,7 @@ router.put("/music/unlike", auth.verifyUser, function (req, res) {
 });
 
 //fetch all the music like by the user
-router.get("/music/liked/all", auth.verifyUser, function (req, res) {
+router.get('/music/liked/all', auth.verifyUser, function (req, res) {
   const userid = req.userInfo._id;
   Music.find({ likes: { $in: [userid] } }, (err, result) => {
     if (!err) {
@@ -204,16 +206,16 @@ router.get("/music/liked/all", auth.verifyUser, function (req, res) {
       console.log(err);
       return res
         .status(400)
-        .json({ msg: "Something went wrong.", success: false });
+        .json({ msg: 'Something went wrong.', success: false });
     }
   });
 });
 
 // Edit Music
 router.put(
-  "/music/edit/:id",
+  '/music/edit/:id',
   auth.verifyUser,
-  musicUpload.single("coverArt"),
+  musicUpload.single('coverArt'),
   function (req, res) {
     const uploadedBy = req.userInfo._id;
     const id = req.params.id;
@@ -238,7 +240,7 @@ router.put(
                 if (err) {
                   res
                     .status(400)
-                    .json({ msg: "Operation Unsuccessful", success: false });
+                    .json({ msg: 'Operation Unsuccessful', success: false });
                 } else {
                   res.status(200).json({ data: result, success: true });
                 }
@@ -256,7 +258,7 @@ router.put(
                 if (err) {
                   res
                     .status(400)
-                    .json({ msg: "Operation Unsuccessful", success: false });
+                    .json({ msg: 'Operation Unsuccessful', success: false });
                 } else {
                   res.status(200).json({ data: result, success: true });
                 }
@@ -265,29 +267,29 @@ router.put(
           }
         } else {
           res.status(400).json({
-            msg: "You cannot edit this music",
+            msg: 'You cannot edit this music',
             success: false,
           });
         }
       })
       .catch((err) => {
-        res.status(400).json({ msg: "Operation Unsuccessful", success: false });
+        res.status(400).json({ msg: 'Operation Unsuccessful', success: false });
       });
   }
 );
 
 // Search for Music
 router.get(
-  "/music/search/:searchkey/:filters?",
+  '/music/search/:searchkey/:filters?',
   auth.verifyUser,
   (req, res) => {
     const searchkey = req.params.searchkey;
-    const filters = req.params.filters && req.params.filters.split(",");
+    const filters = req.params.filters && req.params.filters.split(',');
     if (filters !== undefined && filters.length > 0) {
       Music.find(
         {
           $and: [
-            { name: { $regex: new RegExp(searchkey, "i") } },
+            { name: { $regex: new RegExp(searchkey, 'i') } },
             { genre: { $in: filters } },
           ],
         },
@@ -297,14 +299,14 @@ router.get(
           } else {
             return res
               .status(400)
-              .json({ msg: "Something went wrong.", success: false });
+              .json({ msg: 'Something went wrong.', success: false });
           }
         }
       );
     } else {
       Music.find(
         {
-          name: { $regex: new RegExp(searchkey, "i") },
+          name: { $regex: new RegExp(searchkey, 'i') },
         },
         (err, result) => {
           if (!err) {
@@ -312,7 +314,7 @@ router.get(
           } else {
             return res
               .status(400)
-              .json({ msg: "Something went wrong.", success: false });
+              .json({ msg: 'Something went wrong.', success: false });
           }
         }
       );
@@ -321,12 +323,12 @@ router.get(
 );
 
 //delete music
-router.post("/music/delete", auth.verifyUser, (req, res) => {
+router.post('/music/delete', auth.verifyUser, (req, res) => {
   const musicid = req.body.musicid;
   console.log(musicid);
   Music.findOne({ _id: musicid }, (err, result) => {
     if (!err) {
-      console.log("here");
+      console.log('here');
       console.log(result);
       ReportMusic.updateMany(
         { reportedMusic: musicid },
@@ -351,45 +353,45 @@ router.post("/music/delete", auth.verifyUser, (req, res) => {
                 if (!err) {
                   console.log(result);
                   return res.status(200).json({
-                    msg: "Music deleled sucessfully",
+                    msg: 'Music deleled sucessfully',
                     success: true,
                   });
                 } else {
                   return res
                     .status(400)
-                    .json({ msg: "Something went wrong.", success: false });
+                    .json({ msg: 'Something went wrong.', success: false });
                 }
               });
             })
             .catch((e) => {
               return res
                 .status(400)
-                .json({ msg: "Something went wrong.", success: false });
+                .json({ msg: 'Something went wrong.', success: false });
             });
         })
         .catch((e) => {
           return res
             .status(400)
-            .json({ msg: "Something went wrong.", success: false });
+            .json({ msg: 'Something went wrong.', success: false });
         });
     } else {
-      console.log("here 2");
+      console.log('here 2');
       console.log(err);
       return res
         .status(400)
-        .json({ msg: "Something went wrong.", success: false });
+        .json({ msg: 'Something went wrong.', success: false });
     }
   });
 });
 
-router.put("/music/:musicid/views", auth.verifyUser, (req, res) => {
+router.put('/music/:musicid/views', auth.verifyUser, (req, res) => {
   const musicId = req.params.musicid;
-  console.log("hit");
+  console.log('hit');
   Music.findOneAndUpdate(musicId, {
     $inc: { views: 1 },
   })
     .then((musicData) => {
-      return res.status(200).json({ msg: "Update view count", success: true });
+      return res.status(200).json({ msg: 'Update view count', success: true });
     })
     .catch((e) => {
       return res.status(400).json({ msg: e.data, success: false });
