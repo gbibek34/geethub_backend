@@ -1,11 +1,11 @@
-const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
-const User = mongoose.model("User");
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+const User = mongoose.model('User');
 
 module.exports.verifyUser = function (req, res, next) {
   try {
-    token = req.headers.authorization.split(" ")[1];
-    const data = jwt.verify(token, "mysecretkey");
+    token = req.headers.authorization.split(' ')[1];
+    const data = jwt.verify(token, 'mysecretkey');
     User.findOne({ _id: data._id })
       .then(function (result) {
         req.userInfo = result;
@@ -13,18 +13,18 @@ module.exports.verifyUser = function (req, res, next) {
       })
       .catch(function (e) {
         console.log(e);
-        res.status(400).json({ msg: "Invalid token", error: e });
+        res.status(400).json({ msg: 'Invalid token', error: e });
       });
   } catch (e) {
     console.log(e);
-    res.status(400).json({ msg: "Invalid token", error: e });
+    res.status(400).json({ msg: 'Invalid token', error: e });
   }
 };
 
 module.exports.verifyAdmin = function (req, res, next) {
   try {
-    token = req.headers.authorization.split(" ")[1];
-    const data = jwt.verify(token, "mysecretkey");
+    token = req.headers.authorization.split(' ')[1];
+    const data = jwt.verify(token, 'mysecretkey');
 
     User.findOne({ _id: data._id })
       .then(function (result, err) {
@@ -33,13 +33,13 @@ module.exports.verifyAdmin = function (req, res, next) {
           next();
         } else {
           console.log(err);
-          res.status(400).json({ msg: "User is not an admin" });
+          res.status(400).json({ msg: 'User is not an admin' });
         }
       })
       .catch(function (e) {
-        res.status(400).json({ msg: "Invalid token", error: e });
+        res.status(400).json({ msg: 'Invalid token', error: e });
       });
   } catch (e) {
-    res.status(400).json({ msg: "Invalid token", error: e });
+    res.status(400).json({ msg: 'Invalid token', error: e });
   }
 };
