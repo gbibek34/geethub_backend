@@ -127,7 +127,7 @@ router.get("/artist/followed/all", auth.verifyUser, function (req, res) {
   User.find({ followed_by: { $in: [userid] } }, (err, result) => {
     if (!err) {
       return res.status(200).json({ success: true, data: result });
-    } else {
+    } else {  ar
       console.log(err);
       return res
         .status(400)
@@ -158,7 +158,7 @@ router.post("/artist/tip", auth.verifyUser, function (req, res) {
           console.log(amount);
           const transaction_data = new TransactionHistory({
             type: "Tip",
-            sendBy: userid,
+            sentBy: userid,
             sentTo: receiver._id,
             amount: Number(amount),
             remarks: remarks,
@@ -226,6 +226,8 @@ router.post("/artist/tip", auth.verifyUser, function (req, res) {
   });
 });
 
+
+//display all the tips of the artist
 router.get("/artist/alltips", auth.verifyUser, (req, res) => {
   TransactionHistory.find({
     sentTo: req.userInfo._id,
