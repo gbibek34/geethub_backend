@@ -66,6 +66,10 @@ const User = mongoose.model('User', {
     type: Number,
     default: 0,
   },
+  is_suspended:{
+    type: Boolean,
+    default: false,
+  }
 });
 
 module.exports = User;

@@ -138,8 +138,8 @@ router.get(
           $lte: new Date(),
         },
       })
-        .populate({ path: "sentBy", select: ["name"] })
-        .populate({ path: "sentBy", select: ["name"] });
+        .populate({ path: "sentBy", select: ["name", "email"] })
+        .populate({ path: "sentTo", select: ["name", "email"] });
       return res.status(200).send({ data, success: true });
     } catch (error) {
       console.log(error);

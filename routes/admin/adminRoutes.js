@@ -1,17 +1,17 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const mongoose = require('mongoose');
-const User = require('../../models/userModel');
-const UserVerification = require('../../models/userVerificationModel');
-const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
-const auth = require('../../auth/auth');
-const jwt = require('jsonwebtoken');
-const ReportMusic = require('../../models/reportMusicModel');
-const Music = require('../../models/musicModel');
-const ReportUser = require('../../models/reportUserModel');
+const mongoose = require("mongoose");
+const User = require("../../models/userModel");
+const UserVerification = require("../../models/userVerificationModel");
+const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
+const auth = require("../../auth/auth");
+const jwt = require("jsonwebtoken");
+const ReportMusic = require("../../models/reportMusicModel");
+const Music = require("../../models/musicModel");
+const ReportUser = require("../../models/reportUserModel");
 
-router.get('/admin/check', auth.verifyAdmin, (req, res) => {
+router.get("/admin/check", auth.verifyAdmin, (req, res) => {
   const result = req.userInfo;
   if (!err) {
     return res.status(200).json({ success: true, data: result });
@@ -19,26 +19,41 @@ router.get('/admin/check', auth.verifyAdmin, (req, res) => {
     console.log(err);
     return res
       .status(400)
-      .json({ msg: 'Something went wrong', success: false });
+      .json({ msg: "Something went wrong", success: false });
   }
 });
 
-router.get('/admin/allusers', auth.verifyAdmin, (req, res) => {
-  User.find({}, (err, result) => {
-    if (!err) {
-      return res.status(200).json({ success: true, data: result });
-    } else {
-      console.log(err);
-      return res
-        .status(400)
-        .json({ msg: 'Something went wrong', success: false });
-    }
-  });
+router.get("/admin/allusers", auth.verifyAdmin, async (req, res) => {
+  const result = await User.aggregate([
+    {
+      $lookup: {
+        from: "musics",
+        localField: "_id",
+        foreignField: "uploadedBy",
+        as: "musics",
+      },
+    },
+    {
+      $addFields: { musics: { $size: "$musics" } },
+    },
+    {
+      $lookup: {
+        from: "playlists",
+        localField: "_id",
+        foreignField: "createdBy",
+        as: "playlists",
+      },
+    },
+    {
+      $addFields: { playlists: { $size: "$playlists" } },
+    },
+  ]);
+  return res.status(200).send({ data: result, success: true });
 });
 
 // get verification user requests
 router.get(
-  '/admin/user/verification/requests',
+  "/admin/user/verification/requests",
   auth.verifyAdmin,
   (req, res) => {
     User.find(
@@ -46,7 +61,7 @@ router.get(
       function (err, result) {
         if (err) {
           return res.status(400).json({
-            msg: 'Something went wrong',
+            msg: "Something went wrong",
             success: false,
           });
         } else {
@@ -61,7 +76,7 @@ router.get(
 );
 
 // verifying verification request
-router.put('/admin/user/verify/:id', auth.verifyAdmin, function (req, res) {
+router.put("/admin/user/verify/:id", auth.verifyAdmin, function (req, res) {
   const id = req.params.id;
   User.findByIdAndUpdate(
     id,
@@ -79,7 +94,7 @@ router.put('/admin/user/verify/:id', auth.verifyAdmin, function (req, res) {
 });
 
 // reject verification request
-router.put('/admin/user/reject/:id', auth.verifyAdmin, function (req, res) {
+router.put("/admin/user/reject/:id", auth.verifyAdmin, function (req, res) {
   const id = req.params.id;
   User.findByIdAndUpdate(id, {
     is_verified: false,
@@ -87,7 +102,7 @@ router.put('/admin/user/reject/:id', auth.verifyAdmin, function (req, res) {
   }).exec((err, user) => {
     if (err) {
       return res.status(400).json({
-        msg: 'Something went wrong',
+        msg: "Something went wrong",
         success: false,
       });
     } else {
@@ -97,7 +112,7 @@ router.put('/admin/user/reject/:id', auth.verifyAdmin, function (req, res) {
       UserRejectData.save((err, data) => {
         if (err) {
           return res.status(400).json({
-            msg: 'Something went wrong',
+            msg: "Something went wrong",
             success: false,
           });
         } else {
@@ -113,7 +128,7 @@ router.put('/admin/user/reject/:id', auth.verifyAdmin, function (req, res) {
 
 ///display all reported music
 router.get(
-  '/admin/musicreport/all',
+  "/admin/musicreport/all",
   auth.verifyAdmin,
   async function (req, res) {
     ReportMusic.find({}, (err, result) => {
@@ -123,14 +138,14 @@ router.get(
         console.log(err);
         return res
           .status(400)
-          .json({ msg: 'Something went wrong', success: false });
+          .json({ msg: "Something went wrong", success: false });
       }
     });
   }
 );
 
 router.get(
-  '/admin/musicreport/pending',
+  "/admin/musicreport/pending",
   auth.verifyAdmin,
   async function (req, res) {
     ReportMusic.find(
@@ -145,7 +160,7 @@ router.get(
           console.log(err);
           return res
             .status(400)
-            .json({ msg: 'Something went wrong', success: false });
+            .json({ msg: "Something went wrong", success: false });
         }
       }
     );
@@ -153,7 +168,7 @@ router.get(
 );
 
 router.get(
-  '/admin/musicreport/rejected',
+  "/admin/musicreport/rejected",
   auth.verifyAdmin,
   async function (req, res) {
     ReportMusic.find(
@@ -168,7 +183,7 @@ router.get(
           console.log(err);
           return res
             .status(400)
-            .json({ msg: 'Something went wrong', success: false });
+            .json({ msg: "Something went wrong", success: false });
         }
       }
     );
@@ -176,7 +191,7 @@ router.get(
 );
 
 router.get(
-  '/admin/musicreport/resolved',
+  "/admin/musicreport/resolved",
   auth.verifyAdmin,
   async function (req, res) {
     ReportMusic.find(
@@ -191,7 +206,7 @@ router.get(
           console.log(err);
           return res
             .status(400)
-            .json({ msg: 'Something went wrong', success: false });
+            .json({ msg: "Something went wrong", success: false });
         }
       }
     );
@@ -199,7 +214,7 @@ router.get(
 );
 
 router.put(
-  '/admin/musicreport/reject',
+  "/admin/musicreport/reject",
   auth.verifyAdmin,
   async function (req, res) {
     const reportid = req.body.reportid;
@@ -217,7 +232,7 @@ router.put(
 );
 
 router.put(
-  '/admin/musicreport/resolve',
+  "/admin/musicreport/resolve",
   auth.verifyAdmin,
   async function (req, res) {
     // const musicid= req.body.reportid;
@@ -260,7 +275,7 @@ router.put(
 );
 
 router.get(
-  '/admin/musicreport/musics',
+  "/admin/musicreport/musics",
   auth.verifyAdmin,
   async function (req, res) {
     var musicid = [];
@@ -280,20 +295,20 @@ router.get(
           .catch((error) => {
             return res
               .status(400)
-              .json({ msg: 'Something went wrong', success: false });
+              .json({ msg: "Something went wrong", success: false });
           });
       })
       .catch((error) => {
         console.log(error);
         return res
           .status(400)
-          .json({ msg: 'Something went wrong', success: false });
+          .json({ msg: "Something went wrong", success: false });
       });
   }
 );
 
 router.get(
-  '/admin/userreport/all',
+  "/admin/userreport/all",
   auth.verifyAdmin,
   async function (req, res) {
     ReportUser.find({}, (err, result) => {
@@ -303,14 +318,14 @@ router.get(
         console.log(err);
         return res
           .status(400)
-          .json({ msg: 'Something went wrong', success: false });
+          .json({ msg: "Something went wrong", success: false });
       }
     });
   }
 );
 
 router.put(
-  '/admin/userreport/reject',
+  "/admin/userreport/reject",
   auth.verifyAdmin,
   async function (req, res) {
     const reportid = req.body.reportid;
@@ -329,7 +344,7 @@ router.put(
 
 //resolve the report of user
 router.put(
-  '/admin/userreport/resolve',
+  "/admin/userreport/resolve",
   auth.verifyAdmin,
   async function (req, res) {
     // const musicid= req.body.reportid;
@@ -372,7 +387,7 @@ router.put(
 );
 
 router.get(
-  '/admin/userreport/pending',
+  "/admin/userreport/pending",
   auth.verifyAdmin,
   async function (req, res) {
     ReportUser.find(
@@ -387,7 +402,7 @@ router.get(
           console.log(err);
           return res
             .status(400)
-            .json({ msg: 'Something went wrong', success: false });
+            .json({ msg: "Something went wrong", success: false });
         }
       }
     );
@@ -395,7 +410,7 @@ router.get(
 );
 
 router.get(
-  '/admin/userreport/rejected',
+  "/admin/userreport/rejected",
   auth.verifyAdmin,
   async function (req, res) {
     ReportUser.find(
@@ -410,7 +425,7 @@ router.get(
           console.log(err);
           return res
             .status(400)
-            .json({ msg: 'Something went wrong', success: false });
+            .json({ msg: "Something went wrong", success: false });
         }
       }
     );
@@ -418,7 +433,7 @@ router.get(
 );
 
 router.get(
-  '/admin/userreport/resolved',
+  "/admin/userreport/resolved",
   auth.verifyAdmin,
   async function (req, res) {
     ReportUser.find(
@@ -433,7 +448,7 @@ router.get(
           console.log(err);
           return res
             .status(400)
-            .json({ msg: 'Something went wrong', success: false });
+            .json({ msg: "Something went wrong", success: false });
         }
       }
     );
@@ -441,7 +456,7 @@ router.get(
 );
 
 router.get(
-  '/admin/userreport/users',
+  "/admin/userreport/users",
   auth.verifyAdmin,
   async function (req, res) {
     var userid = [];
@@ -463,14 +478,14 @@ router.get(
           .catch((error) => {
             return res
               .status(400)
-              .json({ msg: 'Something went wrong', success: false });
+              .json({ msg: "Something went wrong", success: false });
           });
       })
       .catch((error) => {
         console.log(error);
         return res
           .status(400)
-          .json({ msg: 'Something went wrong', success: false });
+          .json({ msg: "Something went wrong", success: false });
       });
   }
 );
