@@ -153,9 +153,10 @@ router.post("/artist/tip", auth.verifyUser, function (req, res) {
       _id: userid,
     })
       .then((result) => {
-        console.log(result.balance);
-        if (result.balance == amount || result.balance > amount) {
+        console.log(result.coins);
+        if (result.coins == amount || result.coins > amount) {
           console.log(amount);
+          console.log(userid)
           const transaction_data = new TransactionHistory({
             type: "Tip",
             sentBy: userid,
@@ -167,14 +168,14 @@ router.post("/artist/tip", auth.verifyUser, function (req, res) {
           transaction_data
             .save()
             .then(function (transaction) {
-              let senderbalance = Number(result.balance - Number(amount));
-              let receiverbalance = Number(receiver.balance + Number(amount));
+              let sendercoins = Number(result.coins - Number(amount));
+              let receivercoins = Number(receiver.coins + Number(amount));
               User.findOneAndUpdate(
                 {
                   _id: userid,
                 },
                 {
-                  balance: senderbalance,
+                  coins: sendercoins,
                 }
               )
                 .then((sender) => {
@@ -183,7 +184,7 @@ router.post("/artist/tip", auth.verifyUser, function (req, res) {
                       _id: artistid,
                     },
                     {
-                      balance: receiverbalance,
+                      coins: receivercoins,
                     }
                   )
                     .then((receiver) => {
@@ -215,7 +216,7 @@ router.post("/artist/tip", auth.verifyUser, function (req, res) {
         } else {
           return res
             .status(400)
-            .json({ msg: "Insufficent balance", success: false });
+            .json({ msg: "Insufficent coins", success: false });
         }
       })
       .catch((e) => {

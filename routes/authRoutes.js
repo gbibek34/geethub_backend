@@ -144,6 +144,11 @@ router.post("/login", (req, res) => {
       .compare(password, savedUser.password)
       .then((match) => {
         if (match) {
+          if (savedUser.is_suspended) {
+            return res
+              .status(200)
+              .json({ msg: "User Account is suspended", success: false });
+          }
           if (!savedUser.is_authenticated) {
             UserVerification.findOne({ userId: savedUser._id })
               .then((result) => {
