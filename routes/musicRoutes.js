@@ -387,6 +387,7 @@ router.post("/music/delete", auth.verifyUser, (req, res) => {
 
 router.put("/music/:musicid/views", auth.verifyUser, (req, res) => {
   const musicId = req.params.musicid;
+
   Music.findOneAndUpdate(musicId, {
     $inc: { views: 1 },
   })
@@ -396,6 +397,82 @@ router.put("/music/:musicid/views", auth.verifyUser, (req, res) => {
     .catch((e) => {
       return res.status(400).json({ msg: e.data, success: false });
     });
+});
+
+router.get("/music/discover/popular", auth.verifyUser, (req, res) => {
+  console.log("in here");
+
+  let popularmusic = [];
+  Music.find({}, null, { sort: { views: -1 } }, function (err, docs) {
+    if (!err) {
+      for (i in docs) {
+        if (i <= 3) {
+          if (docs[i].uploadedBy != req.userInfo._id) {
+            console.log(docs[i].uploadedBy);
+            popularmusic.push(docs[i]);
+          }
+        }
+      }
+      console.log(popularmusic);
+      console.log(req.userInfo._id);
+      return res.status(200).json({ success: true, data: popularmusic });
+    } else {
+      console.log(err);
+      return res.status(400).json({ msg: err.data, success: false });
+    }
+  });
+});
+
+router.get("/music/discover/latest", auth.verifyUser, (req, res) => {
+  let latestmusic = [];
+  Music.find({}, null, { sort: { uploadedOn: -1 } }, function (err, docs) {
+    if (!err) {
+      for (i in docs) {
+        if (i <= 3) {
+          if (docs[i].uploadedBy != req.userInfo._id) {
+            console.log(docs[i].uploadedBy);
+            latestmusic.push(docs[i]);
+            console.log(docs[i]);
+          }
+        }
+      }
+      console.log(req.userInfo._id);
+      return res.status(200).json({ success: true, data: latestmusic });
+    } else {
+      console.log(err);
+      return res.status(400).json({ msg: err.data, success: false });
+    }
+  });
+});
+
+router.get("/music/discover/followed", auth.verifyUser, (req, res) => {
+  const userid = req.userInfo._id;
+  var followedmusic = [];
+  var artistid = [];
+  User.find({ followed_by: { $in: [userid] } }).then((artist) => {
+    for (i in artist) {
+      artistid.push(artist[i]._id);
+    }
+    console.log(artistid);
+    Music.find(
+      { uploadedBy: { $in: artistid } },
+      null,
+      { sort: { uploadedOn: -1 } },
+      function (err, musics) {
+        if (!err) {
+          for (i in musics) {
+            console.log("in here");
+            followedmusic.push(musics[i]);
+            console.log(followedmusic);
+          }
+          return res.status(200).json({ success: true, data: followedmusic });
+        } else {
+          console.log(err);
+          return res.status(400).json({ msg: e.data, success: false });
+        }
+      }
+    );
+  });
 });
 
 module.exports = router;

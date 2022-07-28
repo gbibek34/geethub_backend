@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const User = require('./userModel');
+const mongoose = require("mongoose");
+const User = require("./userModel");
 
-const TransactionHistory = mongoose.model('TransactionHistory', {
+const TransactionHistory = mongoose.model("TransactionHistory", {
   type: {
     type: String,
     required: true,
@@ -22,6 +22,10 @@ const TransactionHistory = mongoose.model('TransactionHistory', {
   date: {
     type: Date,
     required: true,
+  },
+  remarks: {
+    type: String,
+    default: "self",
   },
 });
 
