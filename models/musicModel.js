@@ -20,7 +20,7 @@ const Music = mongoose.model("Music", {
   },
   length: {
     type: Number,
-    required: true,
+    // required: true,
   },
   uploadedBy: {
     type: mongoose.Schema.Types.ObjectId,

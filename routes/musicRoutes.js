@@ -41,6 +41,7 @@ router.post(
         return length;
       } catch (error) {
         console.error(error.message);
+        return 0;
       }
     }
 
@@ -386,7 +387,7 @@ router.post("/music/delete", auth.verifyUser, (req, res) => {
 
 router.put("/music/:musicid/views", auth.verifyUser, (req, res) => {
   const musicId = req.params.musicid;
-  console.log("hit");
+
   Music.findOneAndUpdate(musicId, {
     $inc: { views: 1 },
   })
