@@ -1,6 +1,13 @@
 const mongoose = require('mongoose');
 
-mongoose.connect('mongoosedatabaseurl', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}) // TODO: Change the link inside inverted commas to database link
+module.exports = () => {
+  const connectionParams = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  };
+  try {
+    mongoose.connect(process.env.DB, connectionParams);
+  } catch (error) {
+    console.error(error);
+  }
+};

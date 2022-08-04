@@ -1,11 +1,19 @@
+require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 var cors = require('cors');
+const connection = require('./database/connection');
+
+require('./models/userModel');
+require('./models/userVerificationModel');
+
+connection();
 
 const app = express();
 app.use(express.json());
+
+const PORT = process.env.PORT;
+
 app.use(express.urlencoded({ extended: true }));
-require('./database/connection');
 
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
@@ -22,6 +30,38 @@ app.use(function (req, res, next) {
   next();
 });
 
+const authRoute = require('./routes/authRoutes');
+const musicRoute = require('./routes/musicRoutes');
+const profileRoute = require('./routes/profileRoutes');
+const playlistRoute = require('./routes/playlistRoutes');
+const artistRoute = require('./routes/artistRoutes');
+const reportRoute = require('./routes/reportRoutes');
+const adminRoute = require('./routes/admin/adminRoutes');
+const transactionRoute = require('./routes/transactionRoutes');
+const monetizationRoute = require('./routes/admin/monetizationRoute')
+const adminUserRoute = require('./routes/admin/userRoute');
+const adminMusicRoute = require('./routes/admin/musicRoute');
+
+app.use(artistRoute);
+app.use(profileRoute);
+app.use(authRoute);
+app.use(musicRoute);
+app.use(playlistRoute);
+app.use(transactionRoute);
+app.use(adminRoute);
+app.use(reportRoute);
+app.use(monetizationRoute);
+app.use(adminUserRoute);
+app.use(adminMusicRoute);
+
+//here
+app.get('/', (req, res) => {
+  res.send('hello world');
+});
+
+app.use(express.static(__dirname + '/images'));
+app.use(express.static(__dirname + '/music'));
 app.use(cors());
 app.options('*', cors());
-app.listen(3000);
+app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+// app.listen(3000, () => console.log('listening to port 3000'));
